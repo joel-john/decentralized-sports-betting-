@@ -1,0 +1,52 @@
+\documentclass[a4paper, 10pt]{article}
+
+\usepackage[ngerman, english]{babel}
+\usepackage{libertine}
+\usepackage[utf8]{inputenc}
+
+\title{\vspace{-4cm}{\small Project proposal\\}Decentralized Sports Betting}
+\author{Group PONZI\\John Joel, Roland Elias Walter Odorfer, Niklas Sprengel, Duy Minh Vo}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\subsubsection*{Motivation}
+
+The Internet has radically changed the sports betting market.
+Online providers of sports betting are becoming increasingly popular with customers and are constantly opening up new markets.
+However, many providers are based abroad (e.g. in Malta or Cyprus), where the tax and legal framework is more attractive.
+Such a company structure creates little trust among potential customers.
+These sports betting platforms are centralized.
+Players trust a third party to proceed with their assets according to a protocol.
+Additionally, these providers design their odds in a way that they profit in long term.
+For these reasons, a decentralized betting platform has potential to eliminate the third party.
+Without such a third party, players now make bets against other players with their defined odds and without higher fees.
+As a decentralized betting platform is secure by design, the betting protocol being transparent to the players establishes trust as well.
+
+\subsubsection*{Approach}
+
+We utilize Ethereum to develop a DApp.
+The final application should have a user interface through which players can create and place bets.
+One smart contract offers methods to list all available games to bet on and the functionality to create an own bet.
+Once a bet is established between two players, a new smart contract is created that records the establishment, collects the bets from both players, and records the game outcome and the player who won.
+The winner is then allowed to claim the reward.
+The results of the individual games are to be connected via an external REST interface (e.g. Sportradar).
+
+\subsubsection*{Challenges}
+\begin{itemize}
+  \item Identification of users.
+  \item Type of profit. Do players use Ether or some other form of asset?
+  \item How are winnings delivered?
+  \item Getting external data. Such a challenge can be solved using an \emph{Oracle}, but how can we establish trust with that?
+  \item Reduce or eliminate the need for a trusted third party.
+\end{itemize}
+
+\subsubsection*{Schedule and milestones}
+
+One milestone half way through the project demo may be appropriate.
+The first half is dedicated to a more detailed design and specification of the platform followed by the implementation and utilization of a fully trusted single Oracle providing mock game outcomes as a naive first approach.
+The other half will be used to research on how a trustless Oracle can be designed and implemented.
+
+\end{document}
