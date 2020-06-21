@@ -1,0 +1,21 @@
+{
+  "game_results": {
+    "game1": {
+      "team1": "Foo",
+      "team2": "Bar",
+      "team1won": true
+    },
+    
+    "game2": {
+      "team1": "Foo",
+      "team2": "ABC",
+      "team1won": false
+    },
+    
+    "game3": {
+      "team1": "Bar",
+      "team2": "ABC",
+      "team1won": true
+    }
+  }
+}
