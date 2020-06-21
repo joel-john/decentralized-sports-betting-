@@ -9,6 +9,7 @@
     "depcheck": "echo '@chainlink/box' && depcheck --ignore-dirs=build/contracts || true",
     "solhint": "solhint ./contracts/**/*.sol",
     "lint": "yarn solhint",
+    "migrate:bet": "npx truffle migrate --reset --network bet",
     "migrate:dev": "npx truffle migrate --reset --network cldev",
     "migrate:live": "npx truffle migrate --network live",
     "test": "cross-env NODE_ENV=test npx truffle test"

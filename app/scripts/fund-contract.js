@@ -1,4 +1,4 @@
-const MyContract = artifacts.require('MyContract')
+const BetContract = artifacts.require('Bet')
 const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 
 /*
@@ -16,15 +16,16 @@ module.exports = async callback => {
     const accounts = await web3.eth.getAccounts()
     const defaultAccount = accounts[0]
 
-    const mc = await MyContract.deployed()
-    const tokenAddress = await mc.getChainlinkToken()
+    const bc = await BetContract.deployed()
+    const tokenAddress = await bc.getChainlinkToken()
+    
     LinkToken.setProvider(web3.currentProvider)
     const token = await LinkToken.at(tokenAddress)
-    console.log('Funding contract:', mc.address)
-    const tx = await token.transfer(mc.address, payment, {from: defaultAccount})
+    console.log('Funding contract:', bc.address)
+    const tx = await token.transfer(bc.address, payment, {from: defaultAccount})
 
-    const balance = await token.balanceOf.call(mc.address)
-    console.log(`LINK balance of MyContract: ${balance.toString()}`)
+    const balance = await token.balanceOf.call(bc.address)
+    console.log(`LINK balance of Bet: ${balance.toString()}`)
 
     const totalSupply = await token.totalSupply.call()
     console.log(`Total LINK supply: ${totalSupply.toString()}`)

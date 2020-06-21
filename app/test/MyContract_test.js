@@ -99,7 +99,18 @@ contract('MyContract', accounts => {
         times,
         { from: consumer },
       )
+      console.log('============== tx =============')
+      console.log(oc.address)
+      console.log(jobId)
+      console.log(payment)
+      console.log(consumer)
+      console.log('============== request =============')
       request = oracle.decodeRunRequest(tx.receipt.rawLogs[3])
+      console.log(request)
+      console.log(oracle.convertFufillParams(request, response, {
+        from: oracleNode,
+        gas: 500000,
+      }))
       await oc.fulfillOracleRequest(
         ...oracle.convertFufillParams(request, response, {
           from: oracleNode,
