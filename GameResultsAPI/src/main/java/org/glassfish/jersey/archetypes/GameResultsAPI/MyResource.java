@@ -23,17 +23,18 @@ public class MyResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String getIt() {
     	JSONObject jsonObject = new JSONObject();
-    	jsonObject.put("game1", createJSONObjectForGame("Foo", "Bar", true));
-    	jsonObject.put("game2", createJSONObjectForGame("Foo", "ABC", false));
-    	jsonObject.put("game3", createJSONObjectForGame("ABC", "Bar", true));
+    	jsonObject.put("game1", createJSONObjectForGame("Foo", "Bar", true, 1));
+    	jsonObject.put("game2", createJSONObjectForGame("Foo", "ABC", false, 2));
+    	jsonObject.put("game3", createJSONObjectForGame("ABC", "Bar", true, 3));
     	return jsonObject.toJSONString();
     }
     
-    private JSONObject createJSONObjectForGame(String team1, String team2, boolean team1won) {
+    private JSONObject createJSONObjectForGame(String team1, String team2, boolean team1won, int id) {
     	JSONObject obj = new JSONObject();
     	obj.put("team1", team1);
     	obj.put("team2", team2);
     	obj.put("team1won", team1won);
+    	obj.put("game_id", id);
     	return obj;
     }
 }
