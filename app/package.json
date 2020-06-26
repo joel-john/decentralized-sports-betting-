@@ -27,6 +27,8 @@
     "cross-env": "^7.0.2",
     "depcheck": "^0.9.1",
     "openzeppelin-test-helpers": "^0.4.3",
+    "prettier": "^2.0.5",
+    "prettier-plugin-solidity": "^1.0.0-alpha.54",
     "solhint": "^2.1.0",
     "truffle": "^5.1.5"
   }
