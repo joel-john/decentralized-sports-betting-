@@ -1,6 +1,12 @@
 pragma solidity >=0.4.24;
 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 contract Betting {
+
+    // Prevent from arithmetic overflows, especially when dealing with Ether payments
+    using SafeMath for uint;
+
     //codes for TeamSelected
     uint256 constant HOME = 1;
     uint256 constant AWAY = 2;
@@ -34,6 +40,8 @@ contract Betting {
         mapping(address => Player) player;
         address playerA;
         address playerB;
+        // Required to distinguish between bets that is initialized with zeroes and null pointer
+        bool active;
     }
 
     //TODO Structure for match
@@ -42,14 +50,9 @@ contract Betting {
         uint gameId;
         uint gameStatus;
         uint gameResult; //HOME or AWAY or TIE
-        
     }*/
 
-    // constructor() public {
-    //   minimumBet = 100000000000000;
-    // }
-
-    mapping(uint256 => Bet) bet;
+    mapping(uint256 => Bet) public bet;
 
     uint256 public betCount; //TODO auto calculate betID
 
@@ -58,28 +61,36 @@ contract Betting {
 
         //require(matchStatus == MATCH_PLANNED);
 
-        bet[_betId].betId = _betId;
-        //bet[_betId].gameId = _gameId; //TODO Implement gameID
-        bet[_betId].playerA = msg.sender;
-        bet[_betId].betStatus = 0;
-        bet[_betId].amount = msg.value;
-        bet[_betId].player[msg.sender].teamSelected = _teamSelected;
-        bet[_betId].betStatus = BET_ADDED;
+        Bet storage newBet = bet[_betId];
+
+        newBet.betId = _betId;
+        //newBet.gameId = _gameId; //TODO Implement gameID
+        newBet.playerA = msg.sender;
+        newBet.betStatus = 0;
+        newBet.amount = msg.value;
+        newBet.player[msg.sender].teamSelected = _teamSelected;
+        newBet.betStatus = BET_ADDED;
+        newBet.active = true;
     }
 
     function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
-        require(bet[_betId].betId == _betId); //checks whether the bet already exists
-        require(msg.value == bet[_betId].amount); //requires that the bet amount of playerB == bet amount of playerB
-        require(bet[_betId].betStatus == BET_ADDED); //verifies the bet status
-        //require(bet[_betId].playerA != msg.sender);               //verifies playerA and playerB are different
+        Bet storage b = bet[_betId];
+
+        require(b.active, "Bet must exist"); //checks whether the bet already exists
         require(
-            (bet[_betId].player[bet[_betId].playerA].teamSelected) !=
-                _teamSelected
+            msg.value == b.amount,
+            "Bet amount must match with other player's bet"
+        ); //requires that the bet amount of playerB == bet amount of playerB
+        require(b.betStatus == BET_ADDED, "Bet must be in state BET_ADDED"); //verifies the bet status
+        //require(b.playerA != msg.sender);               //verifies playerA and playerB are different
+        require(
+            (b.player[b.playerA].teamSelected) != _teamSelected,
+            "Selected team already taken by player A"
         ); //teamSelected should be different for playerA and playerB
 
-        bet[_betId].amount = bet[_betId].amount + msg.value; //amount of bet is doubled
-        bet[_betId].player[msg.sender].teamSelected = _teamSelected;
-        bet[_betId].playerB = msg.sender;
-        bet[_betId].betStatus = BET_CONFIRMED;
+        b.amount = b.amount.add(msg.value); //amount of bet is doubled
+        b.player[msg.sender].teamSelected = _teamSelected;
+        b.playerB = msg.sender;
+        b.betStatus = BET_CONFIRMED;
     }
 }
