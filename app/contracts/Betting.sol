@@ -22,29 +22,28 @@ contract Betting {
     uint256 constant BET_ADDED = 1;
     uint256 constant BET_CONFIRMED = 2;
 
+    //Holds the teamSelected value of each Player 
     struct Player {
         uint256 teamSelected; //Home = 1 or Away = 2
         //uint amount;
     }
 
-    //TODO Structure for Bet
+    //Structure for Bet
     struct Bet {
         // uint teamSelected; //Home = 1 or Away = 2
-        uint256 gameId; //TODO
-        uint256 betId;
-        uint256 matchStatus; //TODO
-        //mapping(uint => Game) game; //TODO
-
-        uint256 betStatus;
-        uint256 amount;
-        mapping(address => Player) player;
-        address playerA;
-        address playerB;
-        // Required to distinguish between bets that is initialized with zeroes and null pointer
-        bool active;
+        uint256 matchId;                            //The Id of each match, gets the ID from API, used for getting match status
+        uint256 betId;                              //Unique ID for each bet, used for referencing the bet
+        uint256 matchStatus;                        //TODO Current status of the match, refer matchStatus codes
+        //mapping(uint => Game) game;               //TODO (if needed)
+        uint256 betStatus;                          //Current status of each Bet, refer betStatus Codes
+        uint256 amount;                             //amount currently held in Bet
+        mapping(address => Player) player;          //Maps the address to each Player
+        address playerA;                            //Stores the address of PlayerA (used for distributing winnings)
+        address playerB;                            //Stores the address of PlayerB (used for distributing winnings)
+        bool active;                                // Required to distinguish between bets that is initialized with zeroes and null pointer
     }
 
-    //TODO Structure for match
+    //TODO Structure for match (if needed)
     /*
     struct Game{
         uint gameId;
@@ -52,35 +51,37 @@ contract Betting {
         uint gameResult; //HOME or AWAY or TIE
     }*/
 
-    mapping(uint256 => Bet) public bet;
+    mapping(uint256 => Bet) public bet;             //Maps the betId to each Bet
 
-    uint256 public betCount; //TODO auto calculate betID
+    uint256 public betCount; //TODO (if needed) auto calculate betID
 
-    function addBet(uint256 _betId, uint256 _teamSelected) public payable {
+    function addBet(uint256 _betId, uint256 _teamSelected, uint256 _matchId) public payable {
         //require(msg.value >= minimumBet);
-
-        //require(matchStatus == MATCH_PLANNED);
+        //getMatchStatus(_matchId)                                  //TODO getting the current match status
+        //require(matchStatus == MATCH_PLANNED);                    //TODO verifies match status
 
         Bet storage newBet = bet[_betId];
+        require(newBet.betId != _betId, "BetId Already Exists");    //the betID should be unique
 
         newBet.betId = _betId;
-        //newBet.gameId = _gameId; //TODO Implement gameID
+        newBet.matchId = _matchId;
         newBet.playerA = msg.sender;
         newBet.betStatus = 0;
         newBet.amount = msg.value;
         newBet.player[msg.sender].teamSelected = _teamSelected;
-        newBet.betStatus = BET_ADDED;
+        newBet.betStatus = BET_ADDED;                                //changes the status of bet from 0 to BET_ADDED
         newBet.active = true;
     }
 
-    function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
+    function confirmBet(uint256 _betId, uint256 _teamSelected, uint256 _matchId) public payable {
         Bet storage b = bet[_betId];
 
-        require(b.active, "Bet must exist"); //checks whether the bet already exists
+        require(b.active, "Bet must exist");                        //checks whether the bet already exists
+        require(b.matchId == _matchId, "MatchId should be same");   //verifies the matchId
         require(
             msg.value == b.amount,
             "Bet amount must match with other player's bet"
-        ); //requires that the bet amount of playerB == bet amount of playerB
+        ); //requires that the bet amount of playerB == bet amount of playerA
         require(b.betStatus == BET_ADDED, "Bet must be in state BET_ADDED"); //verifies the bet status
         //require(b.playerA != msg.sender);               //verifies playerA and playerB are different
         require(
