@@ -30,6 +30,12 @@ npm test
 
 If needed, edit the `truffle-config.js` config file to set the desired network to a different port. It assumes any network is running the RPC port on 8545.
 
+Run
+```bash
+npm run migrate:bet
+```
+to deploy a LinkToken, an Oracle, and a Bet contract for testing.
+
 ```bash
 npm run migrate:dev
 ```

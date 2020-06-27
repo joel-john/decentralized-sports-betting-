@@ -76,7 +76,7 @@ contract Betting {
         newBet.betStatus = BET_ADDED;                                //changes the status of bet from 0 to BET_ADDED
         newBet.active = true;
 
-        betCount.add(1);
+        betCount = betCount.add(1);
         iterableBets.push(_betId);
     }
 

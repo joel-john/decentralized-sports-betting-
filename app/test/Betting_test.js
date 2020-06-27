@@ -109,7 +109,7 @@ contract('Betting', accounts => {
 
   describe('#retrieveAllBets', () => {
     it('works?', async () => {
-      await betting.addBet(0, 0, 0, {from: defaultAccount, value: web3.utils.toWei('3')})
+      await betting.addBet(123123, 0, 0, {from: defaultAccount, value: web3.utils.toWei('3')})
       console.log(await betting.iterableBets.call(0))
     })
   })
