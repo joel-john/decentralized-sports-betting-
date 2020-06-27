@@ -22,7 +22,7 @@ contract Betting {
     uint256 constant BET_ADDED = 1;
     uint256 constant BET_CONFIRMED = 2;
 
-    //Holds the teamSelected value of each Player 
+    //Holds the teamSelected value of each Player
     struct Player {
         uint256 teamSelected; //Home = 1 or Away = 2
         //uint amount;
@@ -73,11 +73,10 @@ contract Betting {
         newBet.active = true;
     }
 
-    function confirmBet(uint256 _betId, uint256 _teamSelected, uint256 _matchId) public payable {
+    function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
         Bet storage b = bet[_betId];
 
         require(b.active, "Bet must exist");                        //checks whether the bet already exists
-        require(b.matchId == _matchId, "MatchId should be same");   //verifies the matchId
         require(
             msg.value == b.amount,
             "Bet amount must match with other player's bet"

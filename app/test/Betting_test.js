@@ -17,14 +17,16 @@ contract('Betting', accounts => {
     it('adds a new bet object that can be read', async () => {
       const betId = 123
       const teamSelected = 1
+      const matchId = 4
       const value = web3.utils.toWei('2', 'ether')
 
-      await betting.addBet(betId, teamSelected, {from: defaultAccount, value: value})
+      await betting.addBet(betId, teamSelected, matchId, {from: defaultAccount, value: value})
       const actualBet = await betting.bet.call(betId)
 
       assert.isTrue(actualBet.active)
       assert.equal(actualBet.betId, betId)
       assert.equal(actualBet.playerA, defaultAccount)
+      assert.equal(actualBet.matchId, matchId)
       assert.equal(actualBet.betStatus, 1)
     })
 
@@ -75,10 +77,11 @@ contract('Betting', accounts => {
     context('with existing bet', () => {
       const betId = 123
       const teamSelected = 1
+      const matchId = 3
       const value = web3.utils.toWei('2', 'ether')
 
       beforeEach(async () => {
-        await betting.addBet(betId, teamSelected, {from: defaultAccount, value: value})
+        await betting.addBet(betId, teamSelected, matchId, {from: defaultAccount, value: value})
         await betting.bet.call(betId)
       })
 
