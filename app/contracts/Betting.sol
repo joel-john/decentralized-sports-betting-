@@ -21,6 +21,7 @@ contract Betting {
     //betStatus Codes
     uint256 constant BET_ADDED = 1;
     uint256 constant BET_CONFIRMED = 2;
+    uint256 constant BET_OVER = 3;
 
     //Holds the teamSelected value of each Player
     struct Player {
@@ -34,12 +35,13 @@ contract Betting {
         uint256 matchId;                            //The Id of each match, gets the ID from API, used for getting match status
         uint256 betId;                              //Unique ID for each bet, used for referencing the bet
         uint256 matchStatus;                        //TODO Current status of the match, refer matchStatus codes
+        uint256 winningTeam;
         //mapping(uint => Game) game;               //TODO (if needed)
         uint256 betStatus;                          //Current status of each Bet, refer betStatus Codes
         uint256 amount;                             //amount currently held in Bet
         mapping(address => Player) player;          //Maps the address to each Player
-        address playerA;                            //Stores the address of PlayerA (used for distributing winnings)
-        address playerB;                            //Stores the address of PlayerB (used for distributing winnings)
+        address payable playerA;                    //Stores the address of PlayerA (used for distributing winnings)
+        address payable playerB;                    //Stores the address of PlayerB (used for distributing winnings)
         bool active;                                // Required to distinguish between bets that is initialized with zeroes and null pointer
     }
 
@@ -59,14 +61,14 @@ contract Betting {
     uint256[] public iterableBets;
     uint256 public betCount; //TODO (if needed) auto calculate betID
 
+    //function for adding new bet
     function addBet(uint256 _betId, uint256 _teamSelected, uint256 _matchId) public payable {
         //require(msg.value >= minimumBet);
-        //getMatchStatus(_matchId)                                  //TODO getting the current match status
-        //require(matchStatus == MATCH_PLANNED);                    //TODO verifies match status
 
         Bet storage newBet = bet[_betId];
         require(!newBet.active, "BetId Already Exists");    //the betID should be unique
-
+        //getMatchStatus(_betId, _matchId)                                                          //TODO getting the current match status
+        //require(newBet.matchStatus == MATCH_PLANNED, "Match Status should be MATCH_PLANNED);      //TODO verifies match status
         newBet.betId = _betId;
         newBet.matchId = _matchId;
         newBet.playerA = msg.sender;
@@ -80,8 +82,11 @@ contract Betting {
         iterableBets.push(_betId);
     }
 
+    //function for confirming a bet
     function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
         Bet storage b = bet[_betId];
+        //getMatchStatus(_betId, _matchId)                            //TODO getting the current match status
+        //require(b.matchStatus == MATCH_PLANNED);                    //TODO verifies match status
 
         require(b.active, "Bet must exist");                        //checks whether the bet already exists
         require(
@@ -100,4 +105,35 @@ contract Betting {
         b.playerB = msg.sender;
         b.betStatus = BET_CONFIRMED;
     }
+    
+    //function for fulfilling a bet(distribute winnings)
+    //the bet amount is distributed evenly to the players in cases where The match is a tie OR the match is cancelled
+    function fulfill(uint256 _betId) public payable{
+        Bet storage b = bet[_betId];
+        //verifies that match is over
+        require (b.matchStatus == MATCH_ENDED||b.matchStatus == MATCH_CANCELLED, "Match Status should be MATCH_ENDED or MATCH_CANCELLED");
+        require (b.betStatus =! BET_OVER, "Bet Status should not be BET_OVER");
+        
+        if(b.matchStatus == MATCH_ENDED){
+            if(b.winningTeam == b.player[b.playerA].teamSelected){
+                b.playerA.transfer(b.amount);
+                b.betStatus = BET_OVER;
+            }else if(b.winningTeam == b.player[b.playerB].teamSelected){
+                b.playerB.transfer(b.amount);
+                b.betStatus = BET_OVER;
+            }
+            else if(b.winningTeam == TIE){
+                b.playerA.transfer(b.amount.div(2));
+                b.playerB.transfer(b.amount.div(2));
+                b.betStatus = BET_OVER;
+            }
+        }else if(b.matchStatus == MATCH_CANCELLED){
+            b.playerA.transfer(b.amount.div(2));
+            b.playerB.transfer(b.amount.div(2));
+            b.betStatus = BET_OVER;
+        }
+        //TODO delete bet[_betId];
+    }
+    
+    
 }
