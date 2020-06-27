@@ -51,8 +51,12 @@ contract Betting {
         uint gameResult; //HOME or AWAY or TIE
     }*/
 
-    mapping(uint256 => Bet) public bet;             //Maps the betId to each Bet
+    mapping (uint256 => Bet) public bet;             //Maps the betId to each Bet
+    // Maps from a request id provided by chainlink to a bet id in order to identify bets from the match outcome
+    mapping (bytes32 => uint256) public oracleRequests;
 
+    // Store bet ids inside this array for iteration purposes
+    uint256[] public iterableBets;
     uint256 public betCount; //TODO (if needed) auto calculate betID
 
     function addBet(uint256 _betId, uint256 _teamSelected, uint256 _matchId) public payable {
@@ -71,6 +75,9 @@ contract Betting {
         newBet.player[msg.sender].teamSelected = _teamSelected;
         newBet.betStatus = BET_ADDED;                                //changes the status of bet from 0 to BET_ADDED
         newBet.active = true;
+
+        betCount.add(1);
+        iterableBets.push(_betId);
     }
 
     function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
