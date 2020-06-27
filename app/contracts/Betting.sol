@@ -65,7 +65,7 @@ contract Betting {
         //require(matchStatus == MATCH_PLANNED);                    //TODO verifies match status
 
         Bet storage newBet = bet[_betId];
-        require(newBet.betId != _betId, "BetId Already Exists");    //the betID should be unique
+        require(!newBet.active, "BetId Already Exists");    //the betID should be unique
 
         newBet.betId = _betId;
         newBet.matchId = _matchId;

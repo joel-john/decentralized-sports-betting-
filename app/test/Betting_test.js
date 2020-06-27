@@ -1,5 +1,6 @@
 const { expectRevert, time } = require('openzeppelin-test-helpers')
 const { assert } = require('chai')
+const { web3 } = require('openzeppelin-test-helpers/src/setup')
 
 contract('Betting', accounts => {
   const Betting = artifacts.require('Betting.sol')
@@ -103,6 +104,13 @@ contract('Betting', accounts => {
           )
         })
       })
+    })
+  })
+
+  describe('#retrieveAllBets', () => {
+    it('works?', async () => {
+      await betting.addBet(0, 0, 0, {from: defaultAccount, value: web3.utils.toWei('3')})
+      console.log(await betting.iterableBets.call(0))
     })
   })
 })
