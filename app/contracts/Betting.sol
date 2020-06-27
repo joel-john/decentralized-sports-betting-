@@ -136,4 +136,21 @@ contract Betting {
     }
     
     
+    //TODO implement : getMatchStatus(_betId)
+    
+    
+    //Use testEnd / testCancel for simulating match condition (till getMatchStatus is implemented)
+
+    //TODO (REMOVE) function for simulating MATCH_ENDED with HOME team winning
+    function testEnd(uint256 _betId) public{
+        Bet storage b = bet[_betId];
+        b.matchStatus = MATCH_ENDED;
+        b.winningTeam = HOME;
+    }
+    
+    //TODO (REMOVE) function for simulating MATCH_CANCELLED
+    function testCancel(uint256 _betId) public{
+        Bet storage b = bet[_betId];
+        b.matchStatus = MATCH_CANCELLED;
+    }
 }
