@@ -1,5 +1,7 @@
 const MyContract = artifacts.require('MyContract')
 const Bet = artifacts.require('Bet')
+const Betting = artifacts.require('Betting')
+
 const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 const { Oracle } = require('@chainlink/contracts/truffle/v0.4/Oracle')
 
@@ -31,6 +33,22 @@ module.exports = (deployer, network, [defaultAccount, playerA, playerB]) => {
                 })
             })
         })
+        case 'ui':
+          deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
+            return deployer
+              .deploy(Betting, { from: defaultAccount })
+              .then(betting => {
+                const contractAddresses = {
+                  bettingContract: {
+                    abi: betting.abi,
+                    address: betting.address
+                  }
+                }
+                let data = JSON.stringify(contractAddresses);
+                fs.writeFileSync(__dirname + '/../ui/src/contracts/contracts.json', data);
+                console.log(betting)
+              })
+          })
         break;
       default:
         deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
