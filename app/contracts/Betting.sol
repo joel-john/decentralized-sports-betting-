@@ -5,7 +5,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Betting is ChainlinkClient {
     // Prevent from arithmetic overflows, especially when dealing with Ether payments
-    using SafeMath for uint256;
+    // Not necessary anymore as ChainlinkClient provides SafeMath already
+    // using SafeMath for uint256;
 
     //codes for TeamSelected
     uint256 constant HOME = 1;
@@ -40,9 +41,15 @@ contract Betting is ChainlinkClient {
         uint256 betStatus; //Current status of each Bet, refer betStatus Codes
         uint256 amount; //amount currently held in Bet
         mapping(address => Player) player; //Maps the address to each Player
-        address payable playerA; //Stores the address of PlayerA (used for distributing winnings)
-        address payable playerB; //Stores the address of PlayerB (used for distributing winnings)
+        address playerA; //Stores the address of PlayerA (used for distributing winnings)
+        address playerB; //Stores the address of PlayerB (used for distributing winnings)
         bool active; // Required to distinguish between bets that is initialized with zeroes and null pointer
+    }
+
+    struct Request {
+        uint256 betId;
+        uint256 response;
+        bool active;
     }
 
     //TODO Structure for match (if needed)
@@ -54,8 +61,8 @@ contract Betting is ChainlinkClient {
     }*/
 
     mapping(uint256 => Bet) public bet; //Maps the betId to each Bet
-    // Maps from a request id provided by chainlink to a bet id in order to identify bets from the match outcome
-    mapping(bytes32 => uint256) public oracleRequests;
+    // Maps from a request id provided by chainlink to a Request (including a bet id) in order to identify bets from the match outcome
+    mapping(bytes32 => Request) public oracleRequests;
 
     // Store bet ids inside this array for iteration purposes
     uint256[] public iterableBets;
@@ -134,7 +141,7 @@ contract Betting is ChainlinkClient {
             b.matchStatus == MATCH_ENDED || b.matchStatus == MATCH_CANCELLED,
             "Match Status should be MATCH_ENDED or MATCH_CANCELLED"
         );
-        require(b.betStatus = !BET_OVER, "Bet Status should not be BET_OVER");
+        require(b.betStatus != BET_OVER, "Bet Status should not be BET_OVER");
 
         if (b.matchStatus == MATCH_ENDED) {
             if (b.winningTeam == b.player[b.playerA].teamSelected) {
@@ -171,5 +178,140 @@ contract Betting is ChainlinkClient {
     function testCancel(uint256 _betId) public {
         Bet storage b = bet[_betId];
         b.matchStatus = MATCH_CANCELLED;
+    }
+
+    /**
+     * @notice Returns the address of the LINK token
+     * @dev This is the public implementation for chainlinkTokenAddress, which is
+     * an internal method of the ChainlinkClient contract
+     */
+    function getChainlinkToken() public view returns (address) {
+        return chainlinkTokenAddress();
+    }
+
+    function requestBetResult(
+        uint256 _betId,
+        address _oracle,
+        uint256 _payment
+    ) public {
+        Bet storage b = bet[_betId];
+        require(b.active, "Bet must exist");
+
+        // Hardcoded stuff for now
+        bytes32 jobId = "4c7b7ffb66b344fbaa64995af81e355a";
+        string memory url = "http://localhost:7070/api";
+        string memory path = uint2str(b.matchId);
+        int256 times = 1;
+
+        bytes32 requestId = createRequestTo(
+            _oracle,
+            jobId,
+            _payment,
+            url,
+            path,
+            times
+        );
+
+        Request storage req = oracleRequests[requestId];
+        req.betId = _betId;
+        req.active = true;
+    }
+
+    /**
+     * @notice Creates a request to the specified Oracle contract address
+     * @dev This function ignores the stored Oracle contract address and
+     * will instead send the request to the address specified
+     * @param _oracle The Oracle contract address to send the request to
+     * @param _jobId The bytes32 JobID to be executed
+     * @param _url The URL to fetch data from
+     * @param _path The dot-delimited path to parse of the response
+     * @param _times The number to multiply the result by
+     */
+    function createRequestTo(
+        address _oracle,
+        bytes32 _jobId,
+        uint256 _payment,
+        string memory _url,
+        string memory _path,
+        int256 _times
+    ) public returns (bytes32 requestId) {
+        Chainlink.Request memory req = buildChainlinkRequest(
+            _jobId,
+            address(this),
+            this.chainlinkCallback.selector
+        );
+        req.add("url", _url);
+        req.add("path", _path);
+        req.addInt("times", _times);
+        requestId = sendChainlinkRequestTo(_oracle, req, _payment);
+    }
+
+    /**
+     * @notice The chainlinkCallback method from requests created by this contract
+     * @dev The recordChainlinkFulfillment protects this function from being called
+     * by anyone other than the oracle address that the request was sent to
+     * @param _requestId The ID that was generated for the request
+     * @param _data The answer provided by the oracle
+     */
+    function chainlinkCallback(bytes32 _requestId, uint256 _data)
+        public
+        recordChainlinkFulfillment(_requestId)
+    {
+        Request storage req = oracleRequests[_requestId];
+        Bet storage b = bet[req.betId];
+
+        req.response = _data; // Redundant, but good for testing
+        b.winningTeam = _data;
+    }
+
+    /**
+     * @notice Allows the owner to withdraw any LINK balance on the contract
+     */
+    function withdrawLink() public {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(
+            link.transfer(msg.sender, link.balanceOf(address(this))),
+            "Unable to transfer"
+        );
+    }
+
+    /**
+     * @notice Call this method if no response is received within 5 minutes
+     * @param _requestId The ID that was generated for the request to cancel
+     * @param _payment The payment specified for the request to cancel
+     * @param _callbackFunctionId The bytes4 callback function ID specified for
+     * the request to cancel
+     * @param _expiration The expiration generated for the request to cancel
+     */
+    function cancelRequest(
+        bytes32 _requestId,
+        uint256 _payment,
+        bytes4 _callbackFunctionId,
+        uint256 _expiration
+    ) public {
+        cancelChainlinkRequest(
+            _requestId,
+            _payment,
+            _callbackFunctionId,
+            _expiration
+        );
+    }
+
+    function uint2str(uint256 _i) internal pure returns (string) {
+        uint256 i = _i;
+        if (i == 0) return "0";
+        uint256 j = i;
+        uint256 length;
+        while (j != 0) {
+            length++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(length);
+        uint256 k = length - 1;
+        while (i != 0) {
+            bstr[k--] = bytes1(48 + (i % 10));
+            i /= 10;
+        }
+        return string(bstr);
     }
 }

@@ -15,7 +15,7 @@ module.exports = async callback => {
     const defaultAccount = accounts[0]
 
     Oracle.setProvider(web3.currentProvider)
-    const oc = await Oracle.at(contractAddresses.oracleContract)
+    const oc = await Oracle.at(contractAddresses.oracle.address)
     
     receipt = await web3.eth.getTransactionReceipt(tx)
     
