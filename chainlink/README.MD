@@ -7,6 +7,7 @@ Instructions for chainlink node setup
 3. Start the start-cl.sh shell script to start the chainlink node via a docker image
     - If prompted for a password, just use type in "password"
 4. Open the GUI of the chainlink node on localhost:6688
+    - If prompted for a email use: "elephant556@fyii.de" and "password" as password
 
 (optional) 5. Change the database in the chainlink-dev.env file to a more stable local instance (limit of parallel users)
 
