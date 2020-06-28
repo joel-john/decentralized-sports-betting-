@@ -1,8 +1,9 @@
 pragma solidity >=0.4.24;
 
+import "@chainlink/contracts/src/v0.4/ChainlinkClient.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-contract Betting {
+contract Betting is ChainlinkClient {
     // Prevent from arithmetic overflows, especially when dealing with Ether payments
     using SafeMath for uint256;
 
@@ -59,6 +60,21 @@ contract Betting {
     // Store bet ids inside this array for iteration purposes
     uint256[] public iterableBets;
     uint256 public betCount; //TODO (if needed) auto calculate betID
+
+    /**
+     * @notice Deploy the contract with a specified address for the LINK
+     * and Oracle contract addresses
+     * @dev Sets the storage for the specified addresses
+     * @param _link The address of the LINK token contract.
+     *              Use 0x0 address to automatically assign one
+     */
+    constructor(address _link) public {
+        if (_link == address(0)) {
+            setPublicChainlinkToken();
+        } else {
+            setChainlinkToken(_link);
+        }
+    }
 
     //function for adding new bet
     function addBet(
