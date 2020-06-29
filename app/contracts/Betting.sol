@@ -40,8 +40,8 @@ contract Betting {
         uint256 betStatus;                          //Current status of each Bet, refer betStatus Codes
         uint256 amount;                             //amount currently held in Bet
         mapping(address => Player) player;          //Maps the address to each Player
-        address payable playerA;                    //Stores the address of PlayerA (used for distributing winnings)
-        address payable playerB;                    //Stores the address of PlayerB (used for distributing winnings)
+        address playerA;                    //Stores the address of PlayerA (used for distributing winnings)
+        address playerB;                    //Stores the address of PlayerB (used for distributing winnings)
         bool active;                                // Required to distinguish between bets that is initialized with zeroes and null pointer
     }
 
@@ -112,7 +112,7 @@ contract Betting {
         Bet storage b = bet[_betId];
         //verifies that match is over
         require (b.matchStatus == MATCH_ENDED||b.matchStatus == MATCH_CANCELLED, "Match Status should be MATCH_ENDED or MATCH_CANCELLED");
-        require (b.betStatus =! BET_OVER, "Bet Status should not be BET_OVER");
+        require (b.betStatus != BET_OVER, "Bet Status should not be BET_OVER");
         
         if(b.matchStatus == MATCH_ENDED){
             if(b.winningTeam == b.player[b.playerA].teamSelected){
