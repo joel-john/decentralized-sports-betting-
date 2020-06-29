@@ -3,7 +3,7 @@
     <img alt="Vue logo" src="../assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div> -->
-  <div>
+  <b-container>
     hello
     <div v-if="web3">
       Betcount:
@@ -50,7 +50,7 @@
         Add a bet
       </b-btn>
     </div>
-  </div>
+  </b-container>
 </template>
 
 <script>
@@ -109,7 +109,7 @@ export default {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
       const value = this.web3.utils.toWei('2', 'ether');
-      this.getBettingContract.methods.addBet(10, 1, 12).send({ from: defaultAccount, value });
+      this.getBettingContract.methods.addBet(1, 12).send({ from: defaultAccount, value });
     },
     async confirmBet(betId) {
       const accounts = await this.web3.eth.getAccounts();

@@ -8,6 +8,12 @@ contract Betting is ChainlinkClient {
     // Not necessary anymore as ChainlinkClient provides SafeMath already
     // using SafeMath for uint256;
 
+    // Events
+    event NewBet(
+        address indexed _from,
+        uint256 _betId
+    );
+
     //codes for TeamSelected
     uint256 constant HOME = 1;
     uint256 constant AWAY = 2;
@@ -83,19 +89,25 @@ contract Betting is ChainlinkClient {
         }
     }
 
-    //function for adding new bet
+    /**
+     * @notice Adds a new bet
+     * @dev Automatically assigns a new bet id and constructs a new Bet struct
+     * @param _teamSelected The predicted winning team of the sender
+     * @param _matchId The (real world) match id of the game this bet refers to.
+     * @return The new bet id, if successful
+     */
     function addBet(
-        uint256 _betId,
         uint256 _teamSelected,
         uint256 _matchId
-    ) public payable {
+    ) public payable returns (uint256 newBetId) {
         //require(msg.value >= minimumBet);
 
-        Bet storage newBet = bet[_betId];
+        newBetId = betCount; // Automatically generate unique bet id
+        Bet storage newBet = bet[newBetId];
         require(!newBet.active, "BetId Already Exists"); //the betID should be unique
-        //getMatchStatus(_betId, _matchId)                                                          //TODO getting the current match status
+        //getMatchStatus(newBetId, _matchId)                                                          //TODO getting the current match status
         //require(newBet.matchStatus == MATCH_PLANNED, "Match Status should be MATCH_PLANNED);      //TODO verifies match status
-        newBet.betId = _betId;
+        newBet.betId = newBetId;
         newBet.matchId = _matchId;
         newBet.playerA = msg.sender;
         newBet.betStatus = 0;
@@ -105,7 +117,10 @@ contract Betting is ChainlinkClient {
         newBet.active = true;
 
         betCount = betCount.add(1);
-        iterableBets.push(_betId);
+        iterableBets.push(newBetId);
+
+        // Emit event for better testability
+        emit NewBet(msg.sender, newBetId);
     }
 
     //function for confirming a bet

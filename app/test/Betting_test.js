@@ -1,7 +1,7 @@
+const { expectEvent, expectRevert, time } = require('openzeppelin-test-helpers')
 const { oracle } = require('@chainlink/test-helpers')
-const { expectRevert, time } = require('openzeppelin-test-helpers')
 const { assert } = require('chai')
-const { web3 } = require('openzeppelin-test-helpers/src/setup')
+const { web3, BN } = require('openzeppelin-test-helpers/src/setup')
 
 contract('Betting', accounts => {
   const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
@@ -27,33 +27,48 @@ contract('Betting', accounts => {
     })
   
     describe('#addBet', () => {
-      it('adds a new bet object that can be read', async () => {
-        const betId = 123
-        const teamSelected = 1
-        const matchId = 4
-        const value = web3.utils.toWei('2', 'ether')
-  
-        await betting.addBet(betId, teamSelected, matchId, {from: defaultAccount, value: value})
-        const actualBet = await betting.bet.call(betId)
-  
+      const teamSelected = 1
+      const matchId = 4
+      const value = web3.utils.toWei('2', 'ether')
+      let tx;
+
+      beforeEach(async () => {
+        tx = await betting.addBet(teamSelected, matchId, {from: defaultAccount, value: value})
+      })
+
+      it('emits event NewBet', async () => {
+        expectEvent.inLogs(tx.logs, 'NewBet', {
+          _from: defaultAccount,
+          _betId: new BN(0)
+        })
+      })
+
+      it('adds correct Bet struct', async () => {
+        const actualBet = await betting.bet.call(0)
+
         assert.isTrue(actualBet.active)
-        assert.equal(actualBet.betId, betId)
+        assert.equal(actualBet.betId, 0)
         assert.equal(actualBet.playerA, defaultAccount)
         assert.equal(actualBet.matchId, matchId)
         assert.equal(actualBet.betStatus, 1)
+      })
+
+      it('increments bet id by one', async () => {
+        const betId = await betting.addBet.call(teamSelected, matchId, {from: defaultAccount, value: value})
+
+        assert.equal(betId, 1)
       })
     })
   
     describe('#confirmBet', () => {
       context('with existing bet', () => {
-        const betId = 123
+        const betId = 0
         const teamSelected = 1
         const matchId = 3
         const value = web3.utils.toWei('2', 'ether')
   
         beforeEach(async () => {
-          await betting.addBet(betId, teamSelected, matchId, {from: defaultAccount, value: value})
-          await betting.bet.call(betId)
+          await betting.addBet(teamSelected, matchId, {from: defaultAccount, value: value})
         })
   
         it('adds second player to an existing bet', async () => {
@@ -74,13 +89,6 @@ contract('Betting', accounts => {
             )
           })
         })
-      })
-    })
-  
-    describe('#retrieveAllBets', () => {
-      it('works?', async () => {
-        await betting.addBet(123123, 0, 0, {from: defaultAccount, value: web3.utils.toWei('3')})
-        console.log(await betting.iterableBets.call(0))
       })
     })
   })
