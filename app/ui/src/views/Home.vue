@@ -3,62 +3,89 @@
     <img alt="Vue logo" src="../assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div> -->
-  <b-container>
-    hello
-    <div v-if="web3">
-      Betcount:
-      {{ betCount }}
-      bets:
-      <b-card
-        title="Bet"
-        class="my-4"
-        :key="i"
-        v-for="(bet, i) in bets"
-        style="max-width: 20rem;"
-      >
-        <b-card-text>
-          <div>
-            betId = {{ bet.betId }}
-          </div>
-          <div>
-            matchId = {{ bet.matchId }}
-          </div>
-          <div>
-            winningTeam = {{ bet.winningTeam }}
-          </div>
-          <div>
-            playerA = {{ bet.playerA.substring(0, 8) }}
-          </div>
-          <div>
-            playerB = {{ bet.playerB.substring(0, 8) }}
-          </div>
-          <div>
-            amount = {{ bet.amount }}
-          </div>
-        </b-card-text>
-        <b-button @click="confirmBet(bet.betId)" variant="primary">Join</b-button>
-        <b-button
-          class="ml-1"
-          @click="requestBetResult(bet.betId,)"
-          variant="primary"
-        >
-          Update
-        </b-button>
-      </b-card>
+  <b-container fluid="lg">
+    <b-row>
+      <b-col>
+        <div class="text-center mb-5">
+          <h1>
+            Decentralized Sports betting
+          </h1>
+        </div>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <div v-if="web3">
+          <h2 class="subheader">
+            Bets
+          </h2>
+          Currently {{ betCount }} open bets.
+          <b-card
+            v-for="(bet, i) in bets"
+            :key="i"
+            title="Bet"
+            class="my-4"
+          >
+            <b-card-text>
+              <div>
+                betId = {{ bet.betId }}
+              </div>
+              <div>
+                matchId = {{ bet.matchId }}
+              </div>
+              <div>
+                winningTeam = {{ bet.winningTeam }}
+              </div>
+              <div>
+                playerA = {{ bet.playerA.substring(0, 8) }}
+              </div>
+              <div>
+                playerB = {{ bet.playerB.substring(0, 8) }}
+              </div>
+              <div>
+                amount = {{ bet.amount }}
+              </div>
+            </b-card-text>
+            <b-button
+              variant="primary"
+              @click="confirmBet(bet.betId)"
+            >
+              Join
+            </b-button>
+            <b-button
+              class="ml-1"
+              variant="primary"
+              @click="requestBetResult(bet.betId)"
+            >
+              Update
+            </b-button>
+          </b-card>
 
-      <b-btn @click="addBet">
-        Add a bet
-      </b-btn>
-    </div>
+          <b-btn @click="addBet">
+            Add a bet
+          </b-btn>
+        </div>
+      </b-col>
+      <b-col>
+        <h2 class="subheader">
+          Create new bet
+        </h2>
+        <BetCreatorForm />
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
 <script>
 // @ is an alias to /src
 import { mapGetters } from 'vuex';
+import BetCreatorForm from '@/components/BetCreatorForm.vue';
 
 export default {
   name: 'Home',
+  components: {
+    BetCreatorForm,
+  },
   data() {
     return {
       betCount: null,
