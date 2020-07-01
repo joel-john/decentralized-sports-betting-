@@ -48,7 +48,7 @@
             </b-card-text>
             <b-button
               variant="primary"
-              @click="confirmBet(bet.betId)"
+              @click="confirmBet(bet.betId, bet.amount)"
             >
               Join
             </b-button>
@@ -138,10 +138,10 @@ export default {
       const value = this.web3.utils.toWei('2', 'ether');
       this.getBettingContract.methods.addBet(1, 12).send({ from: defaultAccount, value });
     },
-    async confirmBet(betId) {
+    async confirmBet(betId, amount) {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
-      const value = this.web3.utils.toWei('2', 'ether');
+      const value = this.web3.utils.toWei(amount, 'wei');
       this.getBettingContract.methods.confirmBet(betId, 2).send({ from: defaultAccount, value });
     },
     async requestBetResult(betId) {

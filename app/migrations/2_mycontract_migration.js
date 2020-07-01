@@ -1,9 +1,11 @@
 const MyContract = artifacts.require('MyContract')
 const Bet = artifacts.require('Bet')
 const Betting = artifacts.require('Betting')
+const LinkToken = artifacts.require('LinkToken')
+const Oracle = artifacts.require('Oracle')
 
-const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
-const { Oracle } = require('@chainlink/contracts/truffle/v0.4/Oracle')
+// const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
+// const { Oracle } = require('@chainlink/contracts/truffle/v0.4/Oracle')
 
 const fs = require('fs');
 

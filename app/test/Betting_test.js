@@ -4,8 +4,8 @@ const { assert } = require('chai')
 const { web3, BN } = require('openzeppelin-test-helpers/src/setup')
 
 contract('Betting', accounts => {
-  const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
-  const { Oracle } = require('@chainlink/contracts/truffle/v0.4/Oracle')
+  const LinkToken = artifacts.require('LinkToken.sol')
+  const Oracle = artifacts.require('Oracle.sol')
   const Betting = artifacts.require('Betting.sol')
 
   const defaultAccount = accounts[0]

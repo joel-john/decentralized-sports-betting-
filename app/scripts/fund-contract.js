@@ -1,5 +1,5 @@
 const BetContract = artifacts.require('Betting') // Change this to 'Bet' as desired
-const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
+const LinkToken = artifacts.require('LinkToken')
 
 /*
   This script is meant to assist with funding the requesting
@@ -17,10 +17,8 @@ module.exports = async callback => {
     const defaultAccount = accounts[0]
 
     const bc = await BetContract.deployed()
-    const tokenAddress = await bc.getChainlinkToken()
+    const token = await LinkToken.deployed()
     
-    LinkToken.setProvider(web3.currentProvider)
-    const token = await LinkToken.at(tokenAddress)
     console.log('Funding contract:', bc.address)
     const tx = await token.transfer(bc.address, payment, {from: defaultAccount})
 
