@@ -1,17 +1,15 @@
 {
-  "1" : {
+  "1": {
     "team1": "Foo",
     "team2": "Bar",
     "result": 0
   },
-
-  "2" : {
+  "2": {
     "team1": "Bar",
     "team2": "Foobar",
     "result": 0
   },
-
-  "3" : {
+  "3": {
     "team1": "Foo",
     "team2": "Foobar",
     "result": 0
