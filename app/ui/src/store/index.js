@@ -9,16 +9,22 @@ export default new Vuex.Store({
     web3: null,
     contracts: {
       betting: null,
+      oracle: null,
+      link: null,
     },
   },
   getters: {
     getBettingContract: (state) => state.contracts.betting,
+    oracle: (state) => state.contracts.oracle,
+    link: (state) => state.contracts.link,
   },
   mutations: {
     registerWeb3Instance(state, payload) {
       console.log('registerWeb3instance Mutation being executed', payload);
       state.web3 = payload.instance;
       state.contracts.betting = payload.contracts.betting;
+      state.contracts.oracle = payload.contracts.oracle;
+      state.contracts.link = payload.contracts.link;
     },
   },
   actions: {

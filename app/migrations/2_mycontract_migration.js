@@ -36,17 +36,29 @@ module.exports = (deployer, network, [defaultAccount, playerA, playerB]) => {
         case 'ui':
           deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
             return deployer
-              .deploy(Betting, { from: defaultAccount })
-              .then(betting => {
-                const contractAddresses = {
-                  bettingContract: {
-                    abi: betting.abi,
-                    address: betting.address
-                  }
-                }
-                let data = JSON.stringify(contractAddresses);
-                fs.writeFileSync(__dirname + '/../ui/src/contracts/contracts.json', data);
-                console.log(betting)
+              .deploy(Oracle, link.address, { from: defaultAccount })
+              .then(oracle => {
+                return deployer
+                  .deploy(Betting, link.address, { from: defaultAccount })
+                  .then(betting => {
+                    const contractAddresses = {
+                      link: {
+                        abi: link.abi,
+                        address: link.address
+                      },
+                      oracle: {
+                        abi: oracle.abi,
+                        address: oracle.address
+                      },
+                      betting: {
+                        abi: betting.abi,
+                        address: betting.address
+                      }
+                    }
+                    let data = JSON.stringify(contractAddresses);
+                    fs.writeFileSync(__dirname + '/../build/contractAddresses.json', data);
+                    fs.writeFileSync(__dirname + '/../ui/src/contracts/contracts.json', data);
+                  })
               })
           })
         break;

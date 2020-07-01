@@ -21,7 +21,7 @@ function getSessionCookie() {
       
       res.on('data', () => { /* DO NOTHING */ });
       res.on('end', () => {
-        resolve(res.headers["set-cookie"][0]);
+        resolve(res.headers["set-cookie"][1]);
       });
 
       res.on('error', (err) => {
@@ -30,7 +30,7 @@ function getSessionCookie() {
     });
 
     const reqBody = JSON.stringify({
-      email: 'user@example.com',
+      email: 'elephant556@fyii.de',
       password: 'password'
     });
 
@@ -60,6 +60,7 @@ function getAddr(sessionCookie) {
       });
 
       res.on('end', () => {
+        console.log(JSON.parse(resBody).data[0].id);
         resolve(JSON.parse(resBody).data[0].id);
       });
 

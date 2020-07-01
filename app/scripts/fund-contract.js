@@ -1,4 +1,4 @@
-const BetContract = artifacts.require('Bet')
+const BetContract = artifacts.require('Betting') // Change this to 'Bet' as desired
 const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 
 /*
