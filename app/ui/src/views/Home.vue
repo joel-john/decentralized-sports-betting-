@@ -147,13 +147,20 @@ export default {
     async requestBetResult(betId) {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
-      const oracleAddress = this.oracle.options.address;
 
-      console.log(`oracleAddress = ${oracleAddress}`);
+      const oracle = this.oracle.options.address;
+      const jobId = this.web3.utils.fromAscii('4aed36c7c0244227a190d5a1eeb91780');
+      const payment = '1000000000000000000';
+      const url = 'http://172.30.163.5:7070/api';
+      const path = '3.result';
+      const times = 1;
+
+      console.log(betId);
+      console.log(`oracleAddress = ${oracle}`);
 
       const tx = await this.getBettingContract
         .methods
-        .requestBetResult(betId, oracleAddress, '1000000000000000000')
+        .createRequestTo(oracle, jobId, payment, url, path, times)
         .send({ from: defaultAccount });
 
       console.log(`txhash = ${tx.transactionHash}`);

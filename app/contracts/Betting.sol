@@ -207,20 +207,20 @@ contract Betting is ChainlinkClient {
     function requestBetResult(
         uint256 _betId,
         address _oracle,
+        bytes32 _jobId,
         uint256 _payment
     ) public {
         Bet storage b = bet[_betId];
         require(b.active, "Bet must exist");
 
         // Hardcoded stuff for now
-        bytes32 jobId = "4c7b7ffb66b344fbaa64995af81e355a";
         string memory url = "http://localhost:7070/api";
         string memory path = uint2str(b.matchId);
         int256 times = 1;
 
         bytes32 requestId = createRequestTo(
             _oracle,
-            jobId,
+            _jobId,
             _payment,
             url,
             path,

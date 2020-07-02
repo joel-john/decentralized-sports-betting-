@@ -77,7 +77,7 @@ export default {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
 
-      const parsedMatchId = parseInt(this.form.value, 10);
+      const parsedMatchId = parseInt(this.form.matchId, 10);
       const parsedValue = this.web3.utils.toWei(this.form.value, 'ether');
       console.log(parsedValue);
       const tx = await this.getBettingContract.methods

@@ -1,0 +1,54 @@
+igelarm@minh:~/ponzi/app$ truffle console --network ui
+truffle(ui)> const betting = await Betting.deployed()
+undefined
+truffle(ui)> const accounts = await web3.eth.getAccounts()
+undefined
+truffle(ui)> const jobid = web3.utils.fromAscii('a7994107ca9143fc8124e1f9dc37a761')
+undefined
+truffle(ui)> jobid
+'0x6137393934313037636139313433666338313234653166396463333761373631'
+truffle(ui)> const payment = '1000000000000000000'
+undefined
+truffle(ui)> const jobidhex = web3.utils.toHex('a7994107ca9143fc8124e1f9dc37a761')
+undefined
+truffle(ui)> jobidhex
+'0x6137393934313037636139313433666338313234653166396463333761373631'
+truffle(ui)> const oc = await Oracle.deployed()
+undefined
+truffle(ui)> oc.address
+'0xe6597eBAfbf8aB99125D81a533Ed809057882010'
+truffle(ui)> const tx = await betting.createRequestTo(oc.address, jobid, payment, 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD,EUR,JPY', 'USD', 100, {from: accounts[0]})
+undefined
+truffle(ui)> tx
+{ tx:
+   '0xbabaf29669171f8158805a1eba21b142ef690c7dbd864ba13736747fac2acafa',
+  receipt:
+   { transactionHash:
+      '0xbabaf29669171f8158805a1eba21b142ef690c7dbd864ba13736747fac2acafa',
+     transactionIndex: 0,
+     blockHash:
+      '0x68382b54d7d244b27be551349f9029591cd29c47aef568a95101cbc06d598d04',
+     blockNumber: 10,
+     from: '0x5274329563e82b6a5367ede4cadc60844cd485c8',
+     to: '0x7461885105d83fef76928e47c5d0f96f028bfaf0',
+     gasUsed: 129810,
+     cumulativeGasUsed: 129810,
+     contractAddress: null,
+     logs: [ [Object] ],
+     status: true,
+     logsBloom:
+      '0x00000000000000410000000020000000000000000001000000000000020400000002000000000000000000000000000000000000000000000000000000001000000000000000000000000008000000040000000000000100000020000000000000020800000000000000000000000000000000000000080000008010000000000000000000000000000000000000000000000430000000000000000400000000000008000000000000000000000000000000040000000000000800000000000004000002000000000000100000000000000000000000000000000000400800000000000000000000000000800000000000003000000000000000000000000000',
+     rawLogs: [ [Object], [Object], [Object], [Object] ] },
+  logs:
+   [ { logIndex: 0,
+       transactionIndex: 0,
+       transactionHash:
+        '0xbabaf29669171f8158805a1eba21b142ef690c7dbd864ba13736747fac2acafa',
+       blockHash:
+        '0x68382b54d7d244b27be551349f9029591cd29c47aef568a95101cbc06d598d04',
+       blockNumber: 10,
+       address: '0x7461885105D83fef76928E47C5D0F96f028BfAf0',
+       type: 'mined',
+       id: 'log_632a7d77',
+       event: 'ChainlinkRequested',
+       args: [Result] } ] }

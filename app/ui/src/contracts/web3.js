@@ -1,5 +1,7 @@
 import Web3 from 'web3';
-import contracts from '@/contracts/contracts.json';
+import LinkToken from '@/contracts/LinkToken.json';
+import Oracle from '@/contracts/Oracle.json';
+import Betting from '@/contracts/Betting.json';
 
 function getWeb3() {
   if (window.ethereum) {
@@ -10,16 +12,16 @@ function getWeb3() {
     instance: window.web3,
     contracts: {
       betting: new window.web3.eth.Contract(
-        contracts.betting.abi,
-        contracts.betting.address,
+        Betting.abi,
+        Betting.address,
       ),
       oracle: new window.web3.eth.Contract(
-        contracts.oracle.abi,
-        contracts.oracle.address,
+        Oracle.abi,
+        Oracle.address,
       ),
       link: new window.web3.eth.Contract(
-        contracts.link.abi,
-        contracts.link.address,
+        LinkToken.abi,
+        LinkToken.address,
       ),
     },
   };

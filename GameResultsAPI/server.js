@@ -1,18 +1,23 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser')
 var fs = require('fs');
 
 app.use(express.json());
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+})); 
 
-app.get('/', (req, res) => {
+app.get('/api/', (req, res) => {
     fs.readFile( __dirname + "/" + "games.json", 'utf8', (err, data) => {
       console.log(data);
       res.end(data);
     });
 });
 
-app.post('/', (req, res) => {
+app.post('/api/', (req, res) => {
   fs.readFile( __dirname + "/" + "games.json", 'utf8', (err, data) => {
+    console.log(req.body)
     jsonData = JSON.parse(data);
     jsonData[req.body.id]['result'] = req.body.result;
     console.log(jsonData);
@@ -26,6 +31,6 @@ app.post('/', (req, res) => {
   });
 });
 
-var server = app.listen(8080, () => {
-  console.log("Server running on port 8080");
+var server = app.listen(7070, '0.0.0.0', () => {
+  console.log("Server running on port 7070");
 });
