@@ -1,7 +1,7 @@
 var express = require('express');
+var cors = require('cors')
 var app = express();
 var bodyParser = require('body-parser')
-var fs = require('fs');
 
 var games = {
   "1": {
@@ -22,20 +22,21 @@ var games = {
 }
 
 app.use(express.json());
+app.use(cors()) // Enable CORS...
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
 app.get('/api/', (req, res) => {
     console.log(games);
-    res.end(JSON.stringify(games));
+    res.json(games);
 });
 
 app.post('/api/', (req, res) => {
     console.log(req.body)
     games[req.body.id]['result'] = req.body.result;
     console.log(games);
-    res.end(JSON.stringify(games));
+    res.json(games);
 });
 
 var server = app.listen(7070, '0.0.0.0', () => {
