@@ -1,0 +1,56 @@
+// File: custom.scss
+
+// Define your variable overrides here
+// $enable-shadows: true;
+// $enable-gradients: true;
+// $grid-breakpoints: (
+//   xs: 0,
+//   sm: 456px,
+//   md: 789px,
+//   lg: 999px,
+//   xl: 1234px
+// );
+// $bv-enable-table-stacked: false;
+
+$blue:    #0d6efd !default;
+$indigo:  #6610f2 !default;
+$purple:  #6f42c1 !default;
+$pink:    #d63384 !default;
+$red:     #dc3545 !default;
+$orange:  #fd7e14 !default;
+$yellow:  #ffc107 !default;
+$green:   #28a745 !default;
+$teal:    #20c997 !default;
+$cyan:    #17a2b8 !default;
+
+$bg-color: #f2f2f2;
+
+$border-radius-orig:               .25rem !default;
+$border-radius-orig-sm:            .2rem !default;
+$border-radius-orig-lg:            .3rem !default;
+
+$border-radius: 1rem !default;
+
+$btn-border-radius:           $border-radius-orig !default;
+$btn-border-radius-sm:        $border-radius-orig-sm !default;
+$btn-border-radius-lg:        $border-radius-orig-lg !default;
+
+// Include Bootstrap and BootstrapVue SCSS files
+@import '~bootstrap/scss/bootstrap.scss';
+@import '~bootstrap-vue/src/index.scss';
+
+#app {
+  .card {
+    color: $body-color;
+  }
+}
+
+// General style overrides and custom classes
+body {
+  margin: 0;
+}
+
+.my-widget {
+  color: var(--danger);
+}
+// ...

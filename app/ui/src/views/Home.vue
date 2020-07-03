@@ -4,9 +4,9 @@
     <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div> -->
   <b-container fluid="lg">
-    <b-row>
+    <b-row class="">
       <b-col>
-        <div class="text-center mb-5">
+        <div class="content-box text-center py-5 my-4">
           <h1>
             Decentralized Sports betting
           </h1>
@@ -14,63 +14,76 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col>
-        <div v-if="web3">
+      <b-col md="6">
+        <div
+          class="content-box content-box--variant-1"
+        >
           <h2 class="subheader">
             Bets
           </h2>
-          Currently {{ betCount }} open bets.
-          <b-card
-            v-for="(bet, i) in bets"
-            :key="i"
-            title="Bet"
-            class="my-4"
-          >
-            <b-card-text>
-              <div>
-                betId = {{ bet.betId }}
-              </div>
-              <div>
-                matchId = {{ bet.matchId }}
-              </div>
-              <div>
-                winningTeam = {{ bet.winningTeam }}
-              </div>
-              <div>
-                playerA = {{ bet.playerA.substring(0, 8) }}
-              </div>
-              <div>
-                playerB = {{ bet.playerB.substring(0, 8) }}
-              </div>
-              <div>
-                amount = {{ bet.amount }}
-              </div>
-            </b-card-text>
-            <b-button
-              variant="primary"
-              @click="confirmBet(bet.betId, bet.amount)"
+          <div v-if="web3 && bets">
+            Currently {{ betCount }} open bets.
+            <b-card
+              v-for="(bet, i) in bets"
+              :key="i"
+              title="Foo - Bar"
+              class="my-4"
             >
-              Join
-            </b-button>
-            <b-button
-              class="ml-1"
-              variant="primary"
-              @click="requestBetResult(bet.betId)"
-            >
-              Update
-            </b-button>
-          </b-card>
-
-          <b-btn @click="addBet">
-            Add a bet
-          </b-btn>
+              <b-card-text>
+                <div>
+                  betId = {{ bet.betId }}
+                </div>
+                <div>
+                  matchId = {{ bet.matchId }}
+                </div>
+                <div>
+                  winningTeam = {{ bet.winningTeam }}
+                </div>
+                <div>
+                  playerA = {{ bet.playerA.substring(0, 8) }}
+                </div>
+                <div>
+                  playerB = {{ bet.playerB.substring(0, 8) }}
+                </div>
+                <div>
+                  amount = {{ bet.amount }}
+                </div>
+              </b-card-text>
+              <b-button
+                variant="primary"
+                @click="confirmBet(bet.betId, bet.amount)"
+              >
+                Join
+              </b-button>
+              <b-button
+                class="ml-1"
+                variant="primary"
+                @click="requestBetResult(bet.betId)"
+              >
+                Update
+              </b-button>
+              <b-button
+                v-if="bet.winningTeam !== '0'"
+                class="ml-1"
+                variant="success"
+                @click="requestBetResult(bet.betId)"
+              >
+                Finalize
+              </b-button>
+            </b-card>
+          </div>
+          <div v-else>
+            Cannot connect to blockchain. Do you have Metamask installed?
+          </div>
         </div>
       </b-col>
-      <b-col>
-        <h2 class="subheader">
-          Create new bet
-        </h2>
-        <BetCreatorForm />
+      <b-col md="6">
+        <div class="content-box content-box--variant-2">
+          <h2 class="subheader">
+            Create new bet
+          </h2>
+          <BetCreatorForm />
+        </div>
       </b-col>
     </b-row>
   </b-container>
@@ -105,6 +118,7 @@ export default {
   beforeCreate() {
     console.log(this.web3);
     this.$store.dispatch('registerWeb3');
+    this.$store.dispatch('loadGames');
   },
   async mounted() {
     console.log(this.getBettingContract);
@@ -149,18 +163,17 @@ export default {
       const defaultAccount = accounts[0];
 
       const oracle = this.oracle.options.address;
-      const jobId = this.web3.utils.fromAscii('4aed36c7c0244227a190d5a1eeb91780');
+      const jobId = this.web3.utils.fromAscii('ee6f3c821a7147dd9142b59dc8dcf293');
       const payment = '1000000000000000000';
-      const url = 'http://172.30.163.5:7070/api';
+      const url = 'http://172.21.8.136:7070/api';
       const path = '3.result';
       const times = 1;
 
-      console.log(betId);
       console.log(`oracleAddress = ${oracle}`);
 
       const tx = await this.getBettingContract
         .methods
-        .createRequestTo(oracle, jobId, payment, url, path, times)
+        .requestBetResult(betId, oracle, jobId, payment, url, path, times)
         .send({ from: defaultAccount });
 
       console.log(`txhash = ${tx.transactionHash}`);
@@ -168,3 +181,7 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+
+</style>

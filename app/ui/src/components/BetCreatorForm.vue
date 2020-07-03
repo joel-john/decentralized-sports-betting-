@@ -20,6 +20,18 @@
       </b-form-group>
 
       <b-form-group
+        id="input-group-3"
+        label="I am betting on"
+        label-for="input-3"
+      >
+        <b-form-select
+          v-model="form.team"
+          :options="options"
+          value="1"
+        />
+      </b-form-group>
+
+      <b-form-group
         id="input-group-2"
         label="Your bet (in ETH)"
         label-for="input-2"
@@ -55,9 +67,14 @@ export default {
       isTxPending: false,
       latestTxHash: null,
       form: {
+        team: 1,
         matchId: null,
         value: null,
       },
+      options: [
+        { value: 1, text: 'Home' },
+        { value: 2, text: 'Guest' },
+      ],
     };
   },
   computed: {
