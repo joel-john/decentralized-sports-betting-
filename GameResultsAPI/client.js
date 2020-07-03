@@ -3,7 +3,7 @@ console.log('myArgs: ', myArgs);
 
 var XMLHttpRequest = require('xhr2');
 var xhr = new XMLHttpRequest();
-xhr.open("POST", "http://localhost:8080/", true);
+xhr.open("POST", "http://localhost:7070/api/", true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
     "id": myArgs[0],
