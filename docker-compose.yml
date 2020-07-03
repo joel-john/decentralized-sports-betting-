@@ -1,0 +1,57 @@
+version: "3.7"
+services:
+  database:
+    image: "postgres:12.3-alpine"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=cl
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  chainlink:
+    image: "smartcontract/chainlink:latest"
+    command: local n -p /chainlink/chainlink.pwd -a /chainlink/api.pwd
+    volumes:
+      - ./chainlink:/chainlink
+    environment:
+      - ROOT=/chainlink
+      - LOG_LEVEL=debug
+      - ETH_CHAIN_ID=1337
+      - LINK_CONTRACT_ADDRESS=0x97d672744E007a95292d3235A1b421F909571c9C
+      - ORACLE_CONTRACT_ADDRESS=0xD2405c4078805F0C2BCa615ac693CbC500ee748F
+      - MIN_INCOMING_CONFIRMATIONS=0
+      - MIN_OUTGOING_CONFIRMATIONS=0
+      - CHAINLINK_TLS_PORT=0
+      - SECURE_COOKIES=false
+      - ALLOW_ORIGINS=*
+      - ETH_URL=ws://ganache:8545
+      - DATABASE_URL=postgresql://postgres:password@database:5432/cl?sslmode=disable
+      - DATABASE_TIMEOUT=500ms
+    ports: 
+      - "6688:6688"
+    depends_on:
+      - database
+
+  ganache:
+    image: trufflesuite/ganache-cli:v6.9.1
+    entrypoint:
+      - node
+      - /app/ganache-core.docker.cli.js
+      - --deterministic
+      - --db=/ganache_data
+      - --mnemonic
+      - 'find flat salute zebra mosquito laptop sample kangaroo pitch grass trim silver'
+      - --networkId
+      - '5777'
+      - --hostname
+      - '0.0.0.0'
+      - --debug
+    ports:
+      - "8545:8545"
+
+volumes:
+  pgdata:
