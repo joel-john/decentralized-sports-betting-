@@ -17,7 +17,7 @@ var games = {
   "3": {
     "team1": "Foo",
     "team2": "Foobar",
-    "result": "12121212"
+    "result": 0
   }
 }
 
