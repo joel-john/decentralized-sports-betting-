@@ -1,50 +1,29 @@
-pragma solidity >=0.4.24 <0.6.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "@chainlink/contracts/src/v0.4/ChainlinkClient.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 
 /**
- * @title Bet is a contract that models a bet between two players
- * @dev This contract is mostly adopted from the example here https://github.com/smartcontractkit/box
+ * @title MyContract is an example contract which requests data from
+ * the Chainlink network
+ * @dev This contract is designed to work on multiple networks, including
+ * local test networks
  */
-contract Bet is ChainlinkClient, Ownable {
-    // playerA is the 'hosting' player that predicts a game outcome and defines the bet price.
-    // playerB is the 'joining' player that predicts the opposite.
-    address public playerA;
-    address public playerB;
-
-    // The game id this bet is referring to
-    uint256 public gameId;
-
-    // Outcome of the game predicted by playerA. It follows that playerB predicts the complementary.
-    uint256 public playerAPrediction;
-
-    // The game outcome of gameId. Is set by an oracle contract
-    uint256 public observedGameOutcome;
-
-    bool public isActive;
+contract MyContract is ChainlinkClient, Ownable {
+    uint256 public data;
 
     /**
      * @notice Deploy the contract with a specified address for the LINK
      * and Oracle contract addresses
      * @dev Sets the storage for the specified addresses
      * @param _link The address of the LINK token contract
-     * @param _playerA The address of playerA
-     * @param _playerB The address of playerB
      */
-    constructor(
-        address _link,
-        address _playerA,
-        address _playerB
-    ) public {
+    constructor(address _link) public {
         if (_link == address(0)) {
             setPublicChainlinkToken();
         } else {
             setChainlinkToken(_link);
         }
-
-        playerA = _playerA;
-        playerB = _playerB;
     }
 
     /**
@@ -96,7 +75,7 @@ contract Bet is ChainlinkClient, Ownable {
         public
         recordChainlinkFulfillment(_requestId)
     {
-        observedGameOutcome = _data;
+        data = _data;
     }
 
     /**
