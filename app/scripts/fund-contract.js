@@ -1,6 +1,6 @@
 const BetContract = artifacts.require('Betting') // Change this to 'Bet' as desired
-const LinkToken = artifacts.require('LinkToken')
-
+const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
+const link = require('../build/LinkToken.json')
 /*
   This script is meant to assist with funding the requesting
   contract with LINK. It will send 1 LINK to the requesting
@@ -8,7 +8,7 @@ const LinkToken = artifacts.require('LinkToken')
   can be retrieved by calling the withdrawLink() function.
 */
 
-const payment = process.env.TRUFFLE_CL_BOX_PAYMENT || '1000000000000000000'
+const payment = process.env.TRUFFLE_CL_BOX_PAYMENT || '5000000000000000000'
 
 module.exports = async callback => {
   // Modified from the exmaple code since it did not work out of the box...
@@ -16,8 +16,10 @@ module.exports = async callback => {
     const accounts = await web3.eth.getAccounts()
     const defaultAccount = accounts[0]
 
+    LinkToken.setProvider(web3.currentProvider)
+    const token = await LinkToken.at(link.address)
+
     const bc = await BetContract.deployed()
-    const token = await LinkToken.deployed()
     
     console.log('Funding contract:', bc.address)
     const tx = await token.transfer(bc.address, payment, {from: defaultAccount})

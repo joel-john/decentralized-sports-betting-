@@ -18,7 +18,7 @@
 
   background-color: white;
 
-  h1 {
+  h1, h2 {
     font-weight: bold;
   }
 

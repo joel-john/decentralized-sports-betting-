@@ -48,6 +48,9 @@
                 <div>
                   amount = {{ bet.amount }}
                 </div>
+                <div>
+                  state = {{ bet.matchStatus }}
+                </div>
               </b-card-text>
               <b-button
                 variant="primary"
@@ -66,7 +69,7 @@
                 v-if="bet.winningTeam !== '0'"
                 class="ml-1"
                 variant="success"
-                @click="requestBetResult(bet.betId)"
+                @click="fulfill(bet.betId)"
               >
                 Finalize
               </b-button>
@@ -146,26 +149,21 @@ export default {
       const b = await this.betting.methods.betCount().call();
       return b;
     },
-    async addBet() {
-      const accounts = await this.web3.eth.getAccounts();
-      const defaultAccount = accounts[0];
-      const value = this.web3.utils.toWei('2', 'ether');
-      this.getBettingContract.methods.addBet(1, 12).send({ from: defaultAccount, value });
-    },
     async confirmBet(betId, amount) {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
       const value = this.web3.utils.toWei(amount, 'wei');
-      this.getBettingContract.methods.confirmBet(betId, 2).send({ from: defaultAccount, value });
+      this.getBettingContract.methods.confirmBet(betId).send({ from: defaultAccount, value });
     },
     async requestBetResult(betId) {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
 
       const oracle = this.oracle.options.address;
-      const jobId = this.web3.utils.fromAscii('ee6f3c821a7147dd9142b59dc8dcf293');
+      const jobId = this.web3.utils.fromAscii(process.env.VUE_APP_CHAINLINK_JOBID);
+      console.log(jobId);
       const payment = '1000000000000000000';
-      const url = 'http://172.21.8.136:7070/api';
+      const url = 'http://192.168.1.2:7070/api';
       const path = '3.result';
       const times = 1;
 
@@ -177,6 +175,11 @@ export default {
         .send({ from: defaultAccount });
 
       console.log(`txhash = ${tx.transactionHash}`);
+    },
+    async fulfill(betId) {
+      const accounts = await this.web3.eth.getAccounts();
+      const defaultAccount = accounts[0];
+      this.getBettingContract.methods.fulfill(betId).send({ from: defaultAccount });
     },
   },
 };

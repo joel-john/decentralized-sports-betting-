@@ -1,7 +1,7 @@
 const MyContract = artifacts.require('MyContract')
 const Bet = artifacts.require('Bet')
 const Betting = artifacts.require('Betting')
-const LinkToken = artifacts.require('LinkToken')
+const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 const Oracle = artifacts.require('Oracle')
 
 // const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
@@ -36,10 +36,10 @@ module.exports = (deployer, network, [defaultAccount, playerA, playerB]) => {
             })
         })
         case 'ui':
-          let b
           return deployer.then(() => {
-            return LinkToken.deployed()
+            return LinkToken.at(require('../build/LinkToken.json').address)
           }).then(link => {
+            console.log(link.address)
             return deployer.deploy(Betting, link.address, { from: defaultAccount })
           }).then(betting => {
               const contractContext = {address: betting.address, abi: betting.abi}

@@ -1,9 +1,11 @@
-const LinkToken = artifacts.require('LinkToken')
+const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 const Oracle = artifacts.require('Oracle')
 
 const fs = require('fs');
 
 module.exports = (deployer, network, [defaultAccount]) => {
+  LinkToken.setProvider(deployer.provider)
+  
   if (network === 'ui') {
     deployer
       .deploy(LinkToken, { from: defaultAccount })

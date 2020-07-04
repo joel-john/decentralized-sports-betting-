@@ -1,7 +1,7 @@
-pragma solidity >=0.4.24;
+pragma solidity >=0.5.0;
 
-import "@chainlink/contracts/src/v0.4/ChainlinkClient.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@chainlink/contracts/src/v0.5/ChainlinkClient.sol";
+// import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Betting is ChainlinkClient {
     // Prevent from arithmetic overflows, especially when dealing with Ether payments
@@ -16,7 +16,7 @@ contract Betting is ChainlinkClient {
 
     //codes for TeamSelected
     uint256 constant HOME = 1;
-    uint256 constant AWAY = 2;
+    uint256 constant GUEST = 2;
     uint256 constant TIE = 3;
 
     //matchStatus codes //TODO Implementation
@@ -47,8 +47,9 @@ contract Betting is ChainlinkClient {
         uint256 betStatus; //Current status of each Bet, refer betStatus Codes
         uint256 amount; //amount currently held in Bet
         mapping(address => Player) player; //Maps the address to each Player
-        address playerA; //Stores the address of PlayerA (used for distributing winnings)
-        address playerB; //Stores the address of PlayerB (used for distributing winnings)
+        address payable playerA; //Stores the address of PlayerA (used for distributing winnings)
+        address payable playerB; //Stores the address of PlayerB (used for distributing winnings)
+        bool isPlayerABettingOnHome; // true, if playerA thinks the home team is winning
         bool active; // Required to distinguish between bets that is initialized with zeroes and null pointer
     }
 
@@ -101,7 +102,7 @@ contract Betting is ChainlinkClient {
         uint256 _matchId
     ) public payable returns (uint256 newBetId) {
         //require(msg.value >= minimumBet);
-
+        require(_teamSelected == HOME || _teamSelected == GUEST, "Illegal team selected");
         newBetId = betCount; // Automatically generate unique bet id
         Bet storage newBet = bet[newBetId];
         require(!newBet.active, "BetId Already Exists"); //the betID should be unique
@@ -114,6 +115,7 @@ contract Betting is ChainlinkClient {
         newBet.amount = msg.value;
         newBet.player[msg.sender].teamSelected = _teamSelected;
         newBet.betStatus = BET_ADDED; //changes the status of bet from 0 to BET_ADDED
+        newBet.isPlayerABettingOnHome = _teamSelected == HOME;
         newBet.active = true;
 
         betCount = betCount.add(1);
@@ -124,11 +126,10 @@ contract Betting is ChainlinkClient {
     }
 
     //function for confirming a bet
-    function confirmBet(uint256 _betId, uint256 _teamSelected) public payable {
+    function confirmBet(uint256 _betId) public payable {
         Bet storage b = bet[_betId];
         //getMatchStatus(_betId, _matchId)                            //TODO getting the current match status
         //require(b.matchStatus == MATCH_PLANNED);                    //TODO verifies match status
-
         require(b.active, "Bet must exist"); //checks whether the bet already exists
         require(
             msg.value == b.amount,
@@ -136,27 +137,24 @@ contract Betting is ChainlinkClient {
         ); //requires that the bet amount of playerB == bet amount of playerA
         require(b.betStatus == BET_ADDED, "Bet must be in state BET_ADDED"); //verifies the bet status
         //require(b.playerA != msg.sender);               //verifies playerA and playerB are different
-        require(
-            (b.player[b.playerA].teamSelected) != _teamSelected,
-            "Selected team already taken by player A"
-        ); //teamSelected should be different for playerA and playerB
+        uint256 teamSelected = b.isPlayerABettingOnHome ? GUEST : HOME; // Infer playerB's selected team
 
         b.amount = b.amount.add(msg.value); //amount of bet is doubled
-        b.player[msg.sender].teamSelected = _teamSelected;
+        b.player[msg.sender].teamSelected = teamSelected;
         b.playerB = msg.sender;
         b.betStatus = BET_CONFIRMED;
     }
 
     //function for fulfilling a bet(distribute winnings)
     //the bet amount is distributed evenly to the players in cases where The match is a tie OR the match is cancelled
-    function fulfill(uint256 _betId) public payable {
+    function fulfill(uint256 _betId) public {
         Bet storage b = bet[_betId];
         //verifies that match is over
         require(
             b.matchStatus == MATCH_ENDED || b.matchStatus == MATCH_CANCELLED,
             "Match Status should be MATCH_ENDED or MATCH_CANCELLED"
         );
-        require(b.betStatus != BET_OVER, "Bet Status should not be BET_OVER");
+        require(b.betStatus != BET_OVER, "Bet Status should not be BETd_OVER");
 
         if (b.matchStatus == MATCH_ENDED) {
             if (b.winningTeam == b.player[b.playerA].teamSelected) {
@@ -175,7 +173,8 @@ contract Betting is ChainlinkClient {
             b.playerB.transfer(b.amount.div(2));
             b.betStatus = BET_OVER;
         }
-        //TODO delete bet[_betId];
+
+        delete bet[_betId];
     }
 
     //TODO implement : getMatchStatus(_betId)
@@ -208,23 +207,21 @@ contract Betting is ChainlinkClient {
         uint256 _betId,
         address _oracle,
         bytes32 _jobId,
-        uint256 _payment
+        uint256 _payment,
+        string memory _url,
+        string memory _path,
+        int256 _times
     ) public {
         Bet storage b = bet[_betId];
         require(b.active, "Bet must exist");
-
-        // Hardcoded stuff for now
-        string memory url = "http://localhost:7070/api";
-        string memory path = uint2str(b.matchId);
-        int256 times = 1;
 
         bytes32 requestId = createRequestTo(
             _oracle,
             _jobId,
             _payment,
-            url,
-            path,
-            times
+            _url,
+            _path,
+            _times
         );
 
         Request storage req = oracleRequests[requestId];
@@ -277,6 +274,11 @@ contract Betting is ChainlinkClient {
 
         req.response = _data; // Redundant, but good for testing
         b.winningTeam = _data;
+        if (_data == HOME || _data == TIE || _data == GUEST) {
+            b.matchStatus = MATCH_ENDED;
+        } else {
+            b.matchStatus = MATCH_CANCELLED;
+        }
     }
 
     /**
@@ -312,21 +314,29 @@ contract Betting is ChainlinkClient {
         );
     }
 
-    function uint2str(uint256 _i) internal pure returns (string) {
-        uint256 i = _i;
-        if (i == 0) return "0";
-        uint256 j = i;
-        uint256 length;
-        while (j != 0) {
-            length++;
-            j /= 10;
+    /**
+     * @dev Converts a `uint256` to its ASCII `string` representation.
+     */
+    function uint2str(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
         }
-        bytes memory bstr = new bytes(length);
-        uint256 k = length - 1;
-        while (i != 0) {
-            bstr[k--] = bytes1(48 + (i % 10));
-            i /= 10;
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
         }
-        return string(bstr);
+        bytes memory buffer = new bytes(digits);
+        uint256 index = digits - 1;
+        temp = value;
+        while (temp != 0) {
+            buffer[index--] = byte(uint8(48 + temp % 10));
+            temp /= 10;
+        }
+        return string(buffer);
     }
 }

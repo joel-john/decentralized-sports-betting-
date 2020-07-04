@@ -7,7 +7,7 @@ module.exports = async () => {
 function getSessionCookie() {
   return new Promise((resolve, reject) => {
     const opts = {
-      host: 'localhost',
+      host: '192.168.1.2',
       port: '6688',
       path: '/sessions',
       method: 'POST',
@@ -30,7 +30,7 @@ function getSessionCookie() {
     });
 
     const reqBody = JSON.stringify({
-      email: 'elephant556@fyii.de',
+      email: 'user@example.com',
       password: 'password'
     });
 
@@ -42,7 +42,7 @@ function getSessionCookie() {
 function getAddr(sessionCookie) {
   return new Promise((resolve, reject) => {
     const opts = {
-      host: 'localhost',
+      host: '192.168.1.2',
       port: '6688',
       path: '/v2/user/balances',
       method: 'GET',

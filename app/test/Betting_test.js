@@ -4,7 +4,7 @@ const { assert } = require('chai')
 const { web3, BN } = require('openzeppelin-test-helpers/src/setup')
 
 contract('Betting', accounts => {
-  const LinkToken = artifacts.require('LinkToken.sol')
+  const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
   const Oracle = artifacts.require('Oracle.sol')
   const Betting = artifacts.require('Betting.sol')
 
@@ -72,8 +72,7 @@ contract('Betting', accounts => {
         })
   
         it('adds second player to an existing bet', async () => {
-          await betting.confirmBet(betId, 2, { from: otherAccount, value: value })
-  
+          await betting.confirmBet(betId, { from: otherAccount, value: value })
           const actualBet = await betting.bet.call(betId)
           assert.equal(actualBet.playerB, otherAccount)
           assert.equal(actualBet.betStatus, 2)
@@ -84,7 +83,7 @@ contract('Betting', accounts => {
           const otherValue = web3.utils.toWei('8', 'ether')
           it('should revert', async () => {
             await expectRevert(
-              betting.confirmBet(betId, 2, { from: otherAccount, value: otherValue }),
+              betting.confirmBet(betId, { from: otherAccount, value: otherValue }),
               'Bet amount must match with other player\'s bet'
             )
           })
@@ -181,7 +180,6 @@ contract('Betting', accounts => {
       })
   
       it('records the data given to it by the oracle', async () => {
-        console.log(request)
         const currentPrice = (await betting.oracleRequests.call(request.requestId)).response
         console.log(currentPrice)
         assert.equal(
