@@ -26,9 +26,17 @@
             <b-card
               v-for="(bet, i) in bets"
               :key="i"
-              title="Foo - Bar"
               class="my-4"
             >
+              <b-card-title>
+                <span :class="{ 'selected': !bet.isPlayerABettingOnHome }">
+                  Foo
+                </span>
+                vs.
+                <span :class="{ 'selected': bet.isPlayerABettingOnHome }">
+                  Bar
+                </span>
+              </b-card-title>
               <b-card-text>
                 <div>
                   betId = {{ bet.betId }}
@@ -61,7 +69,7 @@
               <b-button
                 class="ml-1"
                 variant="primary"
-                @click="requestBetResult(bet.betId)"
+                @click="requestBetResult(bet.betId, bet.matchId)"
               >
                 Update
               </b-button>
@@ -96,6 +104,7 @@
 // @ is an alias to /src
 import { mapGetters } from 'vuex';
 import BetCreatorForm from '@/components/BetCreatorForm.vue';
+import saId from '@/contracts/saId.json';
 
 export default {
   name: 'Home',
@@ -155,16 +164,17 @@ export default {
       const value = this.web3.utils.toWei(amount, 'wei');
       this.getBettingContract.methods.confirmBet(betId).send({ from: defaultAccount, value });
     },
-    async requestBetResult(betId) {
+    async requestBetResult(betId, matchId) {
       const accounts = await this.web3.eth.getAccounts();
       const defaultAccount = accounts[0];
 
       const oracle = this.oracle.options.address;
-      const jobId = this.web3.utils.fromAscii(process.env.VUE_APP_CHAINLINK_JOBID);
+      const jobId = saId.saId;
       console.log(jobId);
-      const payment = '1000000000000000000';
-      const url = 'http://192.168.1.2:7070/api';
-      const path = '3.result';
+      const payment = '3000000000000000000';
+      const url = 'http://game-result-api:7070/api';
+      console.log(`matchid = ${matchId}`);
+      const path = `${matchId}.result`;
       const times = 1;
 
       console.log(`oracleAddress = ${oracle}`);
@@ -186,5 +196,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+  .selected {
+    border-radius: 0.5rem;
+    background-color: var(--light);
+    border: 2px solid var(--info);
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-right: 10px;
+  }
 </style>
