@@ -1,5 +1,5 @@
-const MyContract = artifacts.require('MyContract')
-const Bet = artifacts.require('Bet')
+const MyContract = null
+const Bet = null
 const Betting = artifacts.require('Betting')
 const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
 const Oracle = artifacts.require('Oracle')
@@ -17,24 +17,25 @@ module.exports = (deployer, network, [defaultAccount, playerA, playerB]) => {
     Oracle.setProvider(deployer.provider)
 
     switch (network) {
-      case 'bet':
-        deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
-          return deployer
-            .deploy(Oracle, link.address, { from: defaultAccount })
-            .then(oracle => {
-              return deployer
-                .deploy(Bet, link.address, playerA, playerB)
-                .then(bet => {
-                  const contractAddresses = {
-                    linkToken: link.address,
-                    oracleContract: oracle.address,
-                    betContract: bet.address
-                  }
-                  let data = JSON.stringify(contractAddresses);
-                  fs.writeFileSync(__dirname + '/../build/contractAddresses.json', data);
-                })
-            })
-        })
+      // case 'bet':
+      //   deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
+      //     return deployer
+      //       .deploy(Oracle, link.address, { from: defaultAccount })
+      //       .then(oracle => {
+      //         return deployer
+      //           .deploy(Bet, link.address, playerA, playerB)
+      //           .then(bet => {
+      //             const contractAddresses = {
+      //               linkToken: link.address,
+      //               oracleContract: oracle.address,
+      //               betContract: bet.address
+      //             }
+      //             let data = JSON.stringify(contractAddresses);
+      //             fs.writeFileSync(__dirname + '/../build/contractAddresses.json', data);
+      //           })
+      //       })
+      //   })
+      //   break
         case 'ui':
           return deployer.then(() => {
             return LinkToken.at(require('../build/LinkToken.json').address)
@@ -47,7 +48,21 @@ module.exports = (deployer, network, [defaultAccount, playerA, playerB]) => {
               fs.writeFileSync(`${__dirname}/../build/Betting.json`, data);
               fs.writeFileSync(`${__dirname}/../ui/src/contracts/Betting.json`, data);
           })
-        break;
+        break
+        case 'demo':
+          console.log('hello')
+          return deployer.then(() => {
+            return LinkToken.at(require('../build/LinkToken.json').address)
+          }).then(link => {
+            console.log(link.address)
+            return deployer.deploy(Betting, link.address, { from: defaultAccount })
+          }).then(betting => {
+              const contractContext = {address: betting.address, abi: betting.abi}
+              const data = JSON.stringify(contractContext)
+              fs.writeFileSync(`${__dirname}/../build/Betting.json`, data);
+              fs.writeFileSync(`${__dirname}/../ui/src/contracts/Betting.json`, data);
+          })
+        break
       default:
         deployer.deploy(LinkToken, { from: defaultAccount }).then(link => {
           return deployer

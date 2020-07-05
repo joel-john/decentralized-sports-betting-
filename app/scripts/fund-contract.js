@@ -8,7 +8,7 @@ const link = require('../build/LinkToken.json')
   can be retrieved by calling the withdrawLink() function.
 */
 
-const payment = process.env.TRUFFLE_CL_BOX_PAYMENT || '5000000000000000000'
+const payment = process.env.TRUFFLE_CL_BOX_PAYMENT || '9000000000000000000'
 
 module.exports = async callback => {
   // Modified from the exmaple code since it did not work out of the box...

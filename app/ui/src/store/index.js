@@ -4,7 +4,7 @@ import axios from 'axios';
 import getWeb3 from '../contracts/web3';
 
 const gameResultsApi = axios.create({
-  baseURL: process.env.VUE_APP_GAME_API || 'http://172.21.8.136:7070/api/',
+  baseURL: process.env.VUE_APP_GAME_API || 'http://localhost:7070/api/',
   timeout: 1000,
   headers: {
     accept: 'application/json',
@@ -40,6 +40,9 @@ export default new Vuex.Store({
     setGames(state, payload) {
       state.games = payload;
     },
+    bla() {
+      console.log('hello');
+    },
   },
   actions: {
     registerWeb3({ commit }) {
@@ -53,6 +56,19 @@ export default new Vuex.Store({
       const games = res.data;
       console.log(games);
       commit('setGames', games);
+    },
+    async setGame({ commit }, { id, result, port }) {
+      const api = axios.create({
+        baseURL: `http://localhost:${port}/api/`,
+        timeout: 1000,
+        headers: {
+          accept: 'application/json',
+        },
+      });
+
+      const res = await api.post('', { id, result });
+      commit('bla');
+      return res;
     },
   },
   modules: {

@@ -1,14 +1,18 @@
 const http = require('http');
 
-module.exports = async () => {
-  return getAddr(await getSessionCookie());
+
+module.exports = async (_host, _port) => {
+  if (!_host) _host = 'localhost'
+  if (!_port) _port = 6688
+  const session = await getSessionCookie(_host, _port)
+  return getAddr(session, _host, _port);
 };
 
-function getSessionCookie() {
+function getSessionCookie(host, port) {
   return new Promise((resolve, reject) => {
     const opts = {
-      host: '192.168.1.2',
-      port: '6688',
+      host,
+      port,
       path: '/sessions',
       method: 'POST',
       headers: {
@@ -39,11 +43,11 @@ function getSessionCookie() {
   });
 }
 
-function getAddr(sessionCookie) {
+function getAddr(sessionCookie, host, port) {
   return new Promise((resolve, reject) => {
     const opts = {
-      host: '192.168.1.2',
-      port: '6688',
+      host,
+      port,
       path: '/v2/user/balances',
       method: 'GET',
       headers: {
@@ -60,7 +64,6 @@ function getAddr(sessionCookie) {
       });
 
       res.on('end', () => {
-        console.log(JSON.parse(resBody).data[0].id);
         resolve(JSON.parse(resBody).data[0].id);
       });
 

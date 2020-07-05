@@ -17,6 +17,11 @@ module.exports = {
       port: 8545,
       network_id: '*',
     },
+    demo: {
+      host: '127.0.0.1',
+      port: 8545,
+      network_id: '*',
+    },
     live: {
       provider: () => {
         return new HDWalletProvider(process.env.MNEMONIC, process.env.RPC_URL)
@@ -29,7 +34,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.5.17',
+      version: '0.5.0',
     },
   },
 }
