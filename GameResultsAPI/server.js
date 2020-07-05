@@ -34,7 +34,8 @@ app.get('/api/', (req, res) => {
 
 app.post('/api/', (req, res) => {
     console.log(req.body)
-    games[req.body.id]['result'] = req.body.result;
+    // Simulate a failing/malicious api
+    games[req.body.id]['result'] = process.env.API_SIMULATE_FAILING ? 12323 : req.body.result;
     console.log(games);
     res.json(games);
 });

@@ -9,38 +9,103 @@ services:
       - POSTGRES_DB=cl
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - ponzi
     ports:
       - "5432:5432"
+  
+  database2:
+    image: "postgres:12.3-alpine"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=cl
+    volumes:
+      - pgdata2:/var/lib/postgresql/data
+    networks:
+      - ponzi
+    ports:
+      - "5433:5432"
+
+  database3:
+    image: "postgres:12.3-alpine"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=cl
+    volumes:
+      - pgdata3:/var/lib/postgresql/data
+    networks:
+      - ponzi
+    ports:
+      - "5434:5432"
 
   chainlink:
     image: "smartcontract/chainlink:latest"
+    restart: on-failure
     command: local n -p /chainlink/chainlink.pwd -a /chainlink/api.pwd
     volumes:
-      - ./chainlink:/chainlink
+      - ./chainlink/node1:/chainlink
+    env_file:
+      - chainlink/chainlink-dev.env
     environment:
-      - ROOT=/chainlink
-      - LOG_LEVEL=debug
-      - ETH_CHAIN_ID=1337
-      - LINK_CONTRACT_ADDRESS=0x97d672744E007a95292d3235A1b421F909571c9C
-      - ORACLE_CONTRACT_ADDRESS=0xD2405c4078805F0C2BCa615ac693CbC500ee748F
-      - MIN_INCOMING_CONFIRMATIONS=0
-      - MIN_OUTGOING_CONFIRMATIONS=0
-      - CHAINLINK_TLS_PORT=0
-      - SECURE_COOKIES=false
-      - ALLOW_ORIGINS=*
-      - ETH_URL=ws://ganache:8545
       - DATABASE_URL=postgresql://postgres:password@database:5432/cl?sslmode=disable
-      - DATABASE_TIMEOUT=500ms
+      - ALLOW_ORIGINS=http://localhost:3000,http://localhost:6688
     ports: 
       - "6688:6688"
+    networks:
+      - ponzi
+      - api
     depends_on:
       - database
+
+  chainlink2:
+    image: "smartcontract/chainlink:latest"
+    restart: on-failure
+    command: local n -p /chainlink/chainlink.pwd -a /chainlink/api.pwd
+    volumes:
+      - ./chainlink/node2:/chainlink
+    env_file:
+      - chainlink/chainlink-dev.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@database2:5432/cl?sslmode=disable
+      - ALLOW_ORIGINS=http://localhost:3000,http://localhost:6689
+    ports: 
+      - "6689:6688"
+    networks:
+      - ponzi
+      - api2
+    depends_on:
+      - database2
+
+  chainlink3:
+    image: "smartcontract/chainlink:latest"
+    restart: on-failure
+    command: local n -p /chainlink/chainlink.pwd -a /chainlink/api.pwd
+    volumes:
+      - ./chainlink/node3:/chainlink
+    env_file:
+      - chainlink/chainlink-dev.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@database3:5432/cl?sslmode=disable
+      - ALLOW_ORIGINS=http://localhost:3000,http://localhost:6690
+    ports: 
+      - "6690:6688"
+    networks:
+      - ponzi
+      - api3
+    depends_on:
+      - database3
 
   ganache:
     image: trufflesuite/ganache-cli:v6.9.1
     entrypoint:
       - node
       - /app/ganache-core.docker.cli.js
+      - --blockTime
+      - '1'
       - --deterministic
       - --db=/ganache_data
       - --mnemonic
@@ -49,9 +114,47 @@ services:
       - '5777'
       - --hostname
       - '0.0.0.0'
-      - --debug
+    networks:
+      - ponzi
     ports:
       - "8545:8545"
+  
+  game-result-api:
+    build: ./GameResultsAPI
+    ports:
+      - "7070:7070"
+    networks:
+      api:
+        aliases:
+          - game-result-api
+
+  game-result-api2:
+    build: ./GameResultsAPI
+    ports:
+      - "7071:7070"
+    networks:
+      api2:
+        aliases:
+          - game-result-api
+
+  game-result-api3:
+    build: ./GameResultsAPI
+    ports:
+      - "7072:7070"
+    networks:
+      api3:
+        aliases:
+          - game-result-api
+    environment:
+    - API_SIMULATE_FAILING=true
 
 volumes:
   pgdata:
+  pgdata2:
+  pgdata3:
+
+networks:
+  ponzi:
+  api:
+  api2:
+  api3:
