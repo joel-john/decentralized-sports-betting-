@@ -12,7 +12,7 @@
     "migrate:bet": "npx truffle migrate --reset --network bet",
     "migrate:dev": "npx truffle migrate --reset --network cldev",
     "migrate:live": "npx truffle migrate --network live",
-    "migrate:demo": "npx truffle migrate --network demo",
+    "migrate:demo": "npx truffle migrate --reset --network demo",
     "fund-link": "cross-env DEMO=true npx truffle exec --network demo ./scripts/fund-contract.js",
     "setup-demo": "cross-env DEMO=true npx truffle exec --network demo ./scripts/prepare-chainlink-node.js",
     "test": "cross-env NODE_ENV=test npx truffle test"
