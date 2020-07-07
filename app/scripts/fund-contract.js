@@ -30,7 +30,8 @@ module.exports = async callback => {
     const totalSupply = await token.totalSupply.call()
     console.log(`Total LINK supply: ${totalSupply.toString()}`)
 
-    callback(tx.tx)
+    console.log(tx.tx)
+    callback()
   } catch (ex) {
     console.error(ex)
   }
