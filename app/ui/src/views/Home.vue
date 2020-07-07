@@ -8,7 +8,7 @@
       <b-col>
         <div class="content-box text-center py-5 my-4">
           <h1>
-            Decentralized Sports betting
+            Decentralized Sports Betting
           </h1>
         </div>
       </b-col>
@@ -22,19 +22,19 @@
             Bets
           </h2>
           <div v-if="web3 && bets">
-            Currently {{ betCount }} open bets.
+            Currently {{ filteredBets.length }} open bets.
             <b-card
-              v-for="(bet, i) in bets"
+              v-for="(bet, i) in filteredBets"
               :key="i"
               class="my-4"
             >
               <b-card-title>
                 <span :class="{ 'selected': !bet.isPlayerABettingOnHome }">
-                  Foo
+                  {{ $store.state.api0[bet.matchId].team1 }}
                 </span>
                 vs.
                 <span :class="{ 'selected': bet.isPlayerABettingOnHome }">
-                  Bar
+                  {{ $store.state.api0[bet.matchId].team2 }}
                 </span>
               </b-card-title>
               <b-card-text>
@@ -89,12 +89,27 @@
         </div>
       </b-col>
       <b-col md="6">
-        <div class="content-box content-box--variant-2">
-          <h2 class="subheader">
-            Create new bet
-          </h2>
-          <BetCreatorForm />
-        </div>
+        <b-row>
+          <b-col>
+            <div class="content-box content-box--variant-2">
+              <h2 class="subheader">
+                Create new bet
+              </h2>
+              <BetCreatorForm />
+            </div>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <div class="content-box content-box--variant-3">
+              <h2 class="subheader">
+                Game schedule
+              </h2>
+              <small class="mb-4">Source of Truth powered by API "Correctness"</small>
+              <GameSchedule :games="$store.state.api0" />
+            </div>
+          </b-col>
+        </b-row>
       </b-col>
     </b-row>
   </b-container>
@@ -104,12 +119,14 @@
 // @ is an alias to /src
 import { mapGetters } from 'vuex';
 import BetCreatorForm from '@/components/BetCreatorForm.vue';
+import GameSchedule from '@/components/GameSchedule.vue';
 import saId from '@/contracts/saId.json';
 
 export default {
   name: 'Home',
   components: {
     BetCreatorForm,
+    GameSchedule,
   },
   data() {
     return {
@@ -125,6 +142,9 @@ export default {
     ]),
     web3() {
       return this.$store.state.web3;
+    },
+    filteredBets() {
+      return this.bets ? this.bets.filter((bet) => bet.active) : [];
     },
   },
   beforeCreate() {
@@ -196,12 +216,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .selected {
-    border-radius: 0.5rem;
-    background-color: var(--light);
-    border: 2px solid var(--info);
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-right: 10px;
-  }
 </style>

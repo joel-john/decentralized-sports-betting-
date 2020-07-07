@@ -15,7 +15,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    games: null,
+    api0: { },
+    api1: { },
+    api2: { },
     web3: null,
     contracts: {
       betting: null,
@@ -38,7 +40,9 @@ export default new Vuex.Store({
       state.contracts.link = payload.contracts.link;
     },
     setGames(state, payload) {
-      state.games = payload;
+      payload.forEach((res, i) => {
+        state[`api${i}`] = res;
+      });
     },
     bla() {
       console.log('hello');
@@ -52,8 +56,12 @@ export default new Vuex.Store({
       commit('registerWeb3Instance', instance);
     },
     async loadGames({ commit }) {
-      const res = await gameResultsApi.get('');
-      const games = res.data;
+      const responses = await Promise.all([
+        gameResultsApi.get('http://localhost:7070/api'),
+        gameResultsApi.get('http://localhost:7071/api'),
+        gameResultsApi.get('http://localhost:7072/api'),
+      ]);
+      const games = responses.map((res) => res.data);
       console.log(games);
       commit('setGames', games);
     },
