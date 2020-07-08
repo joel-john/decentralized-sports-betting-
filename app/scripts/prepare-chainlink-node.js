@@ -92,7 +92,6 @@ module.exports = async callback => {
       console.log(`Writing saId.json with ${saId}`)
       fs.writeFileSync(`${__dirname}/../ui/src/contracts/saId.json`, JSON.stringify({saId}))
       console.log(saId)
-      return
 
     } catch (ex) {
       console.error(ex)
