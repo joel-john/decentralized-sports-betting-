@@ -21,7 +21,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.0.3",
     "@chainlink/test-helpers": "0.0.2",
-    "@openzeppelin/contracts": "^4.4.2",
+    "@openzeppelin/contracts": "^4.7.1",
     "body-parser": "^1.19.0",
     "openzeppelin-solidity": "1.12.0"
   },
